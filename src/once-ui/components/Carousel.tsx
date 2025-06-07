@@ -100,6 +100,7 @@ const Carousel: React.FC<CarouselProps> = ({
               cursor: "pointer",
             }),
           }}
+          unoptimized
         />
       </RevealFx>
       {images.length > 1 && (

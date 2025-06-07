@@ -1,0 +1,59 @@
+---
+title: "D'Hondt System Calculator, Electoral Simulation Tool"
+publishedAt: "2023-06-22"
+summary: "A web application that demystifies the D'Hondt proportional representation method, complete with real data from the 2023 Turkish General Election."
+images:
+  - "/images/projects/dhondt/dhondt_launch.png"
+team:
+  - name: "Berkay Sonel"
+    role: "Front-End Developer"
+    avatar: "/images/avatar.png"
+    linkedIn: "https://www.linkedin.com/in/berkaysonel/"
+link: "https://github.com/berkaysson/dhondt-system-calculator"
+---
+
+## Overview
+
+The D'Hondt System Calculator is a web-based application that simplifies the complex D'Hondt method — a mathematical approach used for proportional representation in multi-party elections. It offers users a clean, interactive UI to simulate elections and understand how seats are allocated. The tool is particularly educational for students, political analysts, and election enthusiasts.
+
+With real-world data from the 2023 Turkish General Election, the calculator allows district-level simulations, helping users see how votes translate into seats across Turkey.
+
+## Purpose and Inspiration
+
+The project was born from a desire to make electoral systems more transparent and approachable. The D'Hondt method can be daunting to understand, especially when applied across large electorates. By turning it into a practical, visual tool, the app empowers people to engage with political data and grasp the mechanics of representative democracy in action.
+
+## Key Features
+
+- **Seat Allocation Simulator**: Implements the D'Hondt method in JavaScript for precise, real-time seat calculations.
+- **2023 Turkish Election Data**: Includes over 6000 lines of real data, letting users simulate district-level outcomes.
+- **Interactive UI**: React-powered frontend built with styled-components for a responsive and aesthetic design.
+- **Data Pipeline**: Transformed complex Excel datasets into structured JSON for use within the app.
+
+## Technologies Used
+
+- **React.js**: Built the interactive UI components and routing.
+- **JavaScript**: Implemented the core algorithm for the D’Hondt system.
+- **Styled-Components**: Handled component-level styling and layout.
+- **CSV-to-JSON Conversion**: Wrote a custom parser to transform raw election data into structured, usable JSON.
+
+## Challenges and Learnings
+
+- **Algorithm Accuracy**: Translating a complex voting method into a reliable algorithm required a deep understanding of both the math and its edge cases.
+- **Data Acquisition and Processing**: Gathering granular election data for every district in Turkey was a challenge. After manual efforts and outreach, I converted Excel files to CSV and created a data parser to generate a usable JSON dataset exceeding 6000 lines.
+- **Frontend Performance**: Handling and displaying such a large dataset interactively demanded efficient rendering and smart component design in React.
+
+## Outcome
+
+This project sharpened my problem-solving skills, particularly around algorithm design and large-scale data transformation. It also strengthened my front-end abilities and gave me real experience building tools that bring clarity to complex systems. The D’Hondt Calculator now serves as both an educational resource and a testament to applying software development to real-world systems.
+
+## Try It Now
+
+- [GitHub Repository](https://github.com/berkaysson/dhondt-system-calculator)
+- [Live](https://berkaysson.github.io/dhondt-system-calculator/)
+
+## Summary
+
+- Built a seat allocation tool using the D’Hondt method with JavaScript.
+- Processed large electoral datasets by converting CSV to structured JSON.
+- Created a user-friendly frontend with React and styled-components.
+- Gained hands-on experience in developing transparent political tech tools.

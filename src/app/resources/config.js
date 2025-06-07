@@ -11,9 +11,7 @@ const routes = {
 
 // Enable password protection on selected routes
 // Set password in the .env file, refer to .env.example
-const protectedRoutes = {
-  "/work/automate-design-handovers-with-a-figma-to-code-pipeline": true,
-};
+const protectedRoutes = {};
 
 import { Geist } from "next/font/google";
 import { Geist_Mono } from "next/font/google";
@@ -39,15 +37,15 @@ const font = {
 
 const style = {
   theme: "dark", // theme is not necessary when using ThemeProvider (default)
-  neutral: "gray", // sand | gray | slate
-  brand: "cyan", // blue | indigo | violet | magenta | pink | red | orange | yellow | moss | green | emerald | aqua | cyan
-  accent: "red", // blue | indigo | violet | magenta | pink | red | orange | yellow | moss | green | emerald | aqua | cyan
-  solid: "contrast", // color | contrast
-  solidStyle: "flat", // flat | plastic
-  border: "playful", // rounded | playful | conservative
+  neutral: "slate", // sand | gray | slate
+  brand: "emerald", // blue | indigo | violet | magenta | pink | red | orange | yellow | moss | green | emerald | aqua | cyan
+  accent: "orange", // blue | indigo | violet | magenta | pink | red | orange | yellow | moss | green | emerald | aqua | cyan
+  solid: "color", // color | contrast
+  solidStyle: "plastic", // flat | plastic
+  border: "rounded", // rounded | playful | conservative
   surface: "translucent", // filled | translucent
   transition: "all", // all | micro | macro
-  scaling: "100" // 90 | 95 | 100 | 105 | 110
+  scaling: "95", // 90 | 95 | 100 | 105 | 110
 };
 
 const effects = {
@@ -55,15 +53,15 @@ const effects = {
     cursor: false,
     x: 50,
     y: 0,
-    radius: 100,
+    radius: 120,
   },
   gradient: {
-    display: false,
+    display: true,
     opacity: 100,
-    x: 50,
-    y: 60,
-    width: 100,
-    height: 50,
+    x: 48,
+    y: 64,
+    width: 72,
+    height: 48,
     tilt: 0,
     colorStart: "accent-background-strong",
     colorEnd: "page-background",
@@ -82,19 +80,19 @@ const effects = {
     height: "0.25rem",
   },
   lines: {
-    display: false,
+    display: true,
     opacity: 100,
-    color: "neutral-alpha-weak",
-    size: "16",
-    thickness: 1,
-    angle: 45,
+    color: "neutral-alpha-medium",
+    size: "32",
+    thickness: 1.3,
+    angle: 90,
   },
 };
 
 const display = {
-  location: true,
-  time: true,
-  themeSwitcher: true
+  location: false,
+  time: false,
+  themeSwitcher: true,
 };
 
 const mailchimp = {
@@ -141,4 +139,13 @@ const mailchimp = {
   },
 };
 
-export { routes, protectedRoutes, effects, style, display, mailchimp, baseURL, font };
+export {
+  routes,
+  protectedRoutes,
+  effects,
+  style,
+  display,
+  mailchimp,
+  baseURL,
+  font,
+};
