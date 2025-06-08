@@ -1,6 +1,6 @@
 .inputs {
   font-size: var(--font-size-heading-xl);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.1s, box-shadow 0.1s;
   width: var(--static-space-48);
   max-width: var(--static-space-48);
 
@@ -9,7 +9,7 @@
   }
 
   &:focus-within {
-    animation: focusAnimation 0.3s forwards;
+    animation: focusAnimation 0.2s forwards;
   }
 }
   

@@ -63,7 +63,7 @@
     top: 50%;
     transform: translateY(-50%);
     left: var(--static-space-4);
-    transition: left 0.3s, transform 0.3s;
+    transition: left 0.2s, transform 0.2s;
     outline: none;
 }
 
@@ -89,7 +89,7 @@
     background-color: var(--brand-alpha-medium);
     border-radius: var(--radius-full);
     z-index: -1;
-    animation: scaleInCenter 0.2s forwards;
+    animation: scaleInCenter 0.1s forwards;
 }
 
 @keyframes scaleInCenter {

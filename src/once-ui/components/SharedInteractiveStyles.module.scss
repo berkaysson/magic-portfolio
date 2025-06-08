@@ -51,7 +51,7 @@
     background-color: var(--brand-alpha-medium);
     border-radius: var(--radius-full);
     z-index: -1;
-    animation: scaleInCenter 0.2s forwards;
+    animation: scaleInCenter 0.1s forwards;
 }
 
 @keyframes scaleInCenter {
@@ -64,7 +64,7 @@
 }
 
 .icon {
-    animation: scaleIn 0.2s forwards;
+    animation: scaleIn 0.1s forwards;
     animation-delay: 0.1s;
     transform: scale(0);
 }

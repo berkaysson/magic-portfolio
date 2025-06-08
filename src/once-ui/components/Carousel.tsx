@@ -106,7 +106,7 @@ const Carousel: React.FC<CarouselProps> = ({
       {images.length > 1 && (
         <>
           {indicator === "line" ? (
-            <Flex gap="4" paddingX="s" fillWidth horizontal="center">
+            <Flex gap="8" paddingX="s" fillWidth horizontal="center">
               {images.map((_, index) => (
                 <Flex
                   key={index}
@@ -116,12 +116,12 @@ const Carousel: React.FC<CarouselProps> = ({
                       activeIndex === index
                         ? "var(--neutral-on-background-strong)"
                         : "var(--neutral-alpha-medium)",
-                    transition: "background 0.3s ease",
+                    transition: "background 0.1s ease",
                   }}
                   cursor="interactive"
                   fillWidth
                   radius="full"
-                  height="2"
+                  height="8"
                 ></Flex>
               ))}
             </Flex>
@@ -133,7 +133,7 @@ const Carousel: React.FC<CarouselProps> = ({
                   style={{
                     border: activeIndex === index ? "2px solid var(--brand-solid-strong)" : "none",
                     borderRadius: "var(--radius-m-nest-4)",
-                    transition: "border 0.3s ease",
+                    transition: "border 0.1s ease",
                   }}
                   cursor="interactive"
                   padding="4"

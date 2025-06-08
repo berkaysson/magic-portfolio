@@ -77,13 +77,13 @@ const about = {
   description: `Meet Berkay Sonel, Full Stack Developer from Ankara, Etimesgut`,
   tableOfContent: {
     display: true,
-    subItems: false,
+    subItems: true,
   },
   avatar: {
     display: true,
   },
   calendar: {
-    display: true,
+    display: false,
     link: "https://cal.com", // Update if you have a personal calendar link
   },
   intro: {

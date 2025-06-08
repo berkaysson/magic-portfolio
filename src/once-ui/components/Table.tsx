@@ -85,7 +85,7 @@ function Table({ data, onRowClick }: TableProps) {
       key={index}
       onClick={onRowClick ? () => onRowClick(index) : undefined}
       className={onRowClick ? "cursor-interactive hover-row" : ""}
-      style={onRowClick ? { transition: "background-color 0.2s ease" } : undefined}
+      style={onRowClick ? { transition: "background-color 0.1s ease" } : undefined}
     >
       {row.map((cell, cellIndex) => (
         <td className="px-16 py-12 font-body font-default font-s" key={cellIndex}>

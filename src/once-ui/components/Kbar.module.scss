@@ -1,17 +1,17 @@
 .overlay {
-  animation: fadeIn 0.2s ease-out forwards;
+  animation: fadeIn 0.1s ease-out forwards;
   backdrop-filter: var(--backdrop-filter);
 
   &.closing {
-    animation: fadeOut 0.2s ease-out forwards;
+    animation: fadeOut 0.1s ease-out forwards;
   }
 }
 
 .content {
-  animation: scaleIn 0.2s ease-out forwards;
+  animation: scaleIn 0.1s ease-out forwards;
 
   &.closing {
-    animation: scaleOut 0.2s ease-out forwards;
+    animation: scaleOut 0.1s ease-out forwards;
   }
 }
 

@@ -1,6 +1,13 @@
-import { Column } from "@/once-ui/components";
+import {
+  Avatar,
+  Button,
+  Column,
+  Flex,
+  IconButton,
+  RevealFx,
+} from "@/once-ui/components";
 import { baseURL } from "@/app/resources";
-import { about, person, work } from "@/app/resources/content";
+import { about, person, social, work } from "@/app/resources/content";
 import { Meta, Schema } from "@/once-ui/modules";
 import { Projects } from "@/components/work/Projects";
 
@@ -31,6 +38,36 @@ export default function Work() {
         }}
       />
       <Projects />
+
+      <RevealFx paddingTop="12" delay={0.1} horizontal="start" paddingLeft="12">
+        <Button
+          id="about"
+          data-border="rounded"
+          href={social[0].link}
+          variant="secondary"
+          size="m"
+          arrowIcon
+        >
+          <Flex gap="8" vertical="center">
+            {social && (
+              <Avatar
+                style={{ marginLeft: "-0.75rem", marginRight: "0.25rem" }}
+                src={person.avatar}
+                size="m"
+              />
+            )}
+            Discover my other projects
+            <IconButton
+              key={social[0].name}
+              href={social[0].link}
+              icon={social[0].icon}
+              tooltip={social[0].name}
+              size="s"
+              variant="ghost"
+            />
+          </Flex>
+        </Button>
+      </RevealFx>
     </Column>
   );
 }

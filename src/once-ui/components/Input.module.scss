@@ -38,7 +38,7 @@
 .label {
     position: absolute;
     left: var(--static-space-16);
-    transition: transform 0.3s, top 0.3s, left 0.3s;
+    transition: transform 0.2s, top 0.2s, left 0.2s;
     color: var(--neutral-on-background-medium);
     pointer-events: none;
     transform-origin: left;

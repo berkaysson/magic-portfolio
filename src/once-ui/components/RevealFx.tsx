@@ -50,13 +50,13 @@ const RevealFx = forwardRef<HTMLDivElement, RevealFxProps>(
     const getSpeedDuration = () => {
       switch (speed) {
         case "fast":
-          return "1s";
+          return "0.4s";
         case "medium":
-          return "2s";
+          return "0.6s";
         case "slow":
-          return "3s";
+          return "1s";
         default:
-          return "2s";
+          return "1.1s";
       }
     };
 

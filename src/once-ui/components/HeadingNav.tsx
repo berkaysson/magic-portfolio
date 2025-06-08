@@ -186,7 +186,7 @@ const HeadingNav = forwardRef<HTMLDivElement, props>(({ className, style, ...res
           position="absolute"
           style={{
             top: `calc(${activeIndex} * var(--static-space-32))`,
-            transition: "top 0.3s ease",
+            transition: "top 0.2s ease",
           }}
         >
           <Row fillWidth solid="brand-strong" radius="full" />
@@ -221,7 +221,7 @@ const HeadingNav = forwardRef<HTMLDivElement, props>(({ className, style, ...res
                   color: isActive
                     ? "var(--neutral-on-background-strong)"
                     : "var(--neutral-on-background-weak)",
-                  transition: "color 0.2s ease",
+                  transition: "color 0.1s ease",
                 }}
               >
                 <Text
@@ -230,7 +230,7 @@ const HeadingNav = forwardRef<HTMLDivElement, props>(({ className, style, ...res
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
-                    transition: "font-weight 0.2s ease",
+                    transition: "font-weight 0.1s ease",
                   }}
                 >
                   {heading.text}

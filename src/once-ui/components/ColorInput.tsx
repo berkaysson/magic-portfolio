@@ -40,7 +40,7 @@ const ColorInput = forwardRef<HTMLInputElement, ColorInputProps>(
                 width: value ? "var(--static-space-0)" : "var(--static-space-20)",
                 transform: value ? "scale(0)" : "scale(1)",
                 opacity: value ? "0" : "1",
-                transition: "0.2s ease-in-out all",
+                transition: "0.1s ease-in-out all",
               }}
             >
               <Flex padding="2">
@@ -59,7 +59,7 @@ const ColorInput = forwardRef<HTMLInputElement, ColorInputProps>(
                 width: value ? "var(--static-space-20)" : "var(--static-space-0)",
                 transform: value ? "scale(1)" : "scale(0)",
                 opacity: value ? "1" : "0",
-                transition: "0.2s ease-in-out all",
+                transition: "0.1s ease-in-out all",
               }}
             ></Flex>
           </Flex>
@@ -79,7 +79,7 @@ const ColorInput = forwardRef<HTMLInputElement, ColorInputProps>(
               fillWidth
               style={{
                 opacity: value ? "1" : "0",
-                transition: "opacity 0.2s ease-in-out",
+                transition: "opacity 0.1s ease-in-out",
               }}
             >
               {value}

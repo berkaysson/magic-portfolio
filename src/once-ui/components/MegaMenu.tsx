@@ -156,7 +156,7 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({ menuGroups, className, ...re
           style={{
             left: `${dropdownPosition.left}px`,
             width: `${dropdownPosition.width}px`,
-            transition: 'left 0.3s ease, width 0.3s ease',
+            transition: 'left 0.2s ease, width 0.2s ease',
             visibility: 'visible',
           }}
           onMouseEnter={() => {
