@@ -21,6 +21,7 @@ import {
   person,
   newsletter,
   social,
+  blog,
 } from "@/app/resources/content";
 import { Mailchimp } from "@/components";
 import { Posts } from "@/components/blog/Posts";
@@ -132,7 +133,15 @@ export default function Home() {
       </RevealFx>
       <Projects range={[2]} />
 
-      <RevealFx paddingTop="12" delay={0.1} horizontal="start" paddingLeft="12">
+      <RevealFx
+        paddingTop="12"
+        delay={0.1}
+        mobileDirection="column"
+        horizontal="space-between"
+        vertical="center"
+        paddingLeft="12"
+        gap="12"
+      >
         <Button
           id="about"
           data-border="rounded"
@@ -153,20 +162,19 @@ export default function Home() {
             />
           </Flex>
         </Button>
+        <Button
+          id="explore"
+          data-border="rounded"
+          href={blog.path}
+          variant="primary"
+          size="s"
+          arrowIcon
+        >
+          <Flex gap="8" vertical="center">
+            See What I Write
+          </Flex>
+        </Button>
       </RevealFx>
-
-      {/* {routes["/blog"] && (
-        <Flex fillWidth gap="24" mobileDirection="column">
-          <Flex flex={1} paddingLeft="l" paddingTop="24">
-            <Heading as="h2" variant="display-strong-xs" wrap="balance">
-              Latest from the blog
-            </Heading>
-          </Flex>
-          <Flex flex={3} paddingX="20">
-            <Posts range={[1, 2]} columns="2" />
-          </Flex>
-        </Flex>
-      )} */}
 
       {newsletter.display && <Mailchimp newsletter={newsletter} />}
     </Column>

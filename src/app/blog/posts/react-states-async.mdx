@@ -1,0 +1,43 @@
+---
+title: "React States Are Asynchronous, But!"
+summary: "State Updates In React Are Asynchronous, But Not Promise!"
+publishedAt: "2023-03-17"
+tag: "#React"
+---
+
+🧠 **State Updates In React Are Asynchronous, But Not Promise!**
+Many developers working with React realize it over time, but it can be confusing at first:
+`setState` (or `setX` with `useState`) functions **work asynchronously, but do not return Promise.**
+
+What does this mean?
+
+```js
+const [count, setCount] = useState(0);
+
+setCount(count + 1);
+console.log(count); // Still the old value!
+```
+
+In the above example, we may think that `count` value has increased immediately, but React batches this update and saves it for the next render. So `console.log(count)` still prints the old value. This shows us the following:
+
+➡️ `setState` is triggered but not applied immediately.
+➡️ We cannot use `.then()` like a Promise.
+➡️ If we want to access the updated state, we have to use methods like `useEffect` or the state function with callback.
+
+For example:
+
+```js
+useEffect((() => {
+ console.log("Count changed:", count);
+}, [count]);
+```
+
+or
+
+```js
+setCount(prev => prev + 1);
+```
+
+So the expression **asynchronous but not promise** comes into play here. React updates the state according to its internal planning, but it doesn't give us a promise. 🔁
+
+Knowing this difference is very important to avoid making mistakes, especially in form operations, animations or state-dependent business logic. 👨‍💻
