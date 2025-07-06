@@ -7,7 +7,7 @@ const person = {
     return `${this.firstName} ${this.lastName}`;
   },
   role: "Full Stack Developer",
-  avatar: "/images/avatar.png",
+  avatar: "/images/avatar-alt.png",
   email: "berkaysonel85@gmail.com",
   location: "Europe/Istanbul", // Expecting the IANA time zone identifier, e.g., 'Europe/Vienna'
   languages: ["English", "Turkish"], // optional: Leave the array empty if you don't want to display languages
@@ -192,11 +192,11 @@ const about = {
         images: [],
       },
       {
-        title: "PostgreSQL & Prisma",
+        title: "PostgreSQL & Prisma | MsSQL & Entity Framework",
         description: (
           <>
             Database design and ORM handling for modern apps with PostgreSQL and
-            Prisma.
+            Prisma or MsSQL and Entity Framework.
           </>
         ),
         images: [],

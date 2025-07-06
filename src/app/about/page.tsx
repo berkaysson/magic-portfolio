@@ -17,7 +17,6 @@ import { person, about, social } from "@/app/resources/content";
 import React from "react";
 import { Meta, Schema } from "@/once-ui/modules";
 import AvatarImage from "@/components/AvatarImage/AvatarImage";
-import GithubContributionImage from "@/../public/images/gallery/github-contributions.webp";
 
 export async function generateMetadata() {
   return Meta.generate({
