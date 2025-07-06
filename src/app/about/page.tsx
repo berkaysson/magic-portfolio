@@ -17,6 +17,7 @@ import { person, about, social } from "@/app/resources/content";
 import React from "react";
 import { Meta, Schema } from "@/once-ui/modules";
 import AvatarImage from "@/components/AvatarImage/AvatarImage";
+import GithubContributionImage from "@/../public/images/gallery/github-contributions.webp";
 
 export async function generateMetadata() {
   return Meta.generate({
@@ -364,6 +365,17 @@ export default function About() {
                     )}
                   </Column>
                 ))}
+
+                <SmartImage
+                  sizes="(max-width: 560px) 100vw, 50vw"
+                  radius="m"
+                  objectFit="contain"
+                  enlarge
+                  aspectRatio={"4 / 3"}
+                  src={"/images/gallery/github-contributions.png"}
+                  alt={"Berkay Sonel's portfolio github contributions"}
+                  className={styles.gridItem}
+                />
               </Column>
             </>
           )}

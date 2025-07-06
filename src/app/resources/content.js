@@ -271,6 +271,11 @@ const gallery = {
       alt: "D'Hondt System Calculator launch screen",
       orientation: "horizontal",
     },
+    {
+      src: "/images/gallery/github-contributions.png",
+      alt: "Berkay Sonel's portfoliogithub contributions",
+      orientation: "horizontal",
+    },
   ],
 };
 
