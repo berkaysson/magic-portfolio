@@ -1,0 +1,70 @@
+---
+title: "Building an Authentication Starter: Lessons from Integrating Next.js, PostgreSQL, Prisma, and NextAuth"
+summary: "I recently put together a starter application to handle user authentication in Next.js 14, combining PostgreSQL, Prisma, and NextAuth. This post shares how I approached integrating these tools to create a trusted foundation for web applications."
+publishedAt: "2024-07-15"
+tag: "#Nextjs #Authentication #WebDevelopment #CleanCode"
+---
+
+# Building an Authentication Starter: Lessons from Integrating Next.js, PostgreSQL, Prisma, and NextAuth
+
+When starting a new web project, setting up user authentication can often feel like a significant initial friction. There are many components involved: managing user data, securing routes, handling different login methods, and keeping everything type-safe. My goal was to create a solid starting point for future projects, something that handles these complexities without requiring extensive setup each time. This led me to develop a Next.js authentication starter app, and I'd like to share some insights from the process.
+
+## The Foundation: Why These Technologies?
+
+The project is built on a few core technologies, chosen for their individual strengths and how well they work together. These technologies also promising and future proof.
+
+### Next.js
+
+I chose **Next.js 14** as the application framework. Its App Router structure makes route definition and data fetching much clearer, especially for server-side rendered applications. It offers a modern approach that simplifies many common web development tasks.
+
+### PostgreSQL & Prisma
+
+For data management, I implemented for **PostgreSQL** and **Prisma**. PostgreSQL is a widely used relational database, known for its stability. Prisma, as an ORM, significantly simplifies database interactions. It provides a type-safe way to define models and perform queries, which was a huge win for developer experience and reducing potential bugs. Defining my database schema in `prisma/schema.prisma` and using Prisma migrations felt a natural fit for managing changes.
+
+### NextAuth.js
+
+**NextAuth.js** handles the core authentication logic. It abstracts away much of the complexity of session management, social logins (like Google and GitHub), and callback handling. Configuring it in `auth.config.ts` allowed me to define providers and custom callbacks easily.
+
+### Additional Tools
+
+*   **Resend**: For sending emails related to verification and password resets. This was chosen for its developer-friendly API.
+*   **Tailwind CSS & ShadCN**: To get a user interface up and running quickly. Tailwind CSS helps with rapid styling, and ShadCN provides a collection of accessible components built on top of it.
+*   **Zod**: For form validation. Defining schemas in `schemas/` made sure my data inputs were always correctly formatted and type-safe, preventing many common form-related issues.
+*   **bcryptjs**: For password encryption, a crucial security measure.
+
+## Key Features I Focused On
+
+This starter app includes several features designed to cover common authentication needs:
+
+*   **User Forms**: Login, verification, update password, reset password and registration pages, supporting both email/password and social logins (Google, GitHub).
+*   **Protected Routes**: Implementing `middleware.ts` to check user sessions before allowing access to specific parts of the application, like `/settings`. The user should add his/her application pages to here.
+*   **Email Verification & Password Reset**: Generating secure tokens and using Resend to send emails for these critical flows.
+*   **Data Handling**: A clear separation between `actions/` for database mutations and `data/` for read operations.
+
+## How the Project is Organized
+
+Understanding the project's layout was important for building it and will be for anyone extending it.
+
+*   **`app/`**: Contains all route definitions, including public routes like `/` and `/auth/login`, and protected routes like `/(protected)/settings`. App router.
+*   **`actions/`**: Where server actions live, connecting to the database for operations like creating a new user or updating a profile.
+*   **`data/`**: Functions for fetching data from the database, typically read-only.
+*   **`components/`**: My reusable UI elements, keeping the interface consistent.
+*   **`lib/`**: General utilities and helpers.
+*   **`prisma/`**: Holds the Prisma schema and generated client for database models and migrations.
+*   **`schemas/`**: All Zod validation schemas, ensuring data integrity.
+*   **`middleware.ts`**: Handles route protection and authentication checks.
+*   **`auth.config.ts`**: NextAuth configuration details, including providers and callbacks.
+
+## Insights and Lessons Learned
+
+One of the main takeaways from putting this together was the power of explicit data validation with Zod. It really helped to catch errors early and provided clear feedback for form inputs. Separating concerns between `actions/` and `data/` also made the server-side logic much easier to reason about and maintain as the project grew. User can use tanstack query or useSwr for data fetching, starter pack enables every possible way that user can go.
+
+Thinking about alternatives, I considered different ORMs like neon, but Prisma's type-safety with TypeScript was a strong argument for its use and also very easy to use, I found that Neon is another powerful alternative but for a starter kit it was too much like raw SQL. For email sending, there are many options, but Resend's API worked well for integrating token generation. These parts very easy to change and use alternative.
+
+## Concluding Thoughts
+
+This Next.js authentication starter project is designed to offer a solid starting point for applications needing user authentication. It brings together well-regarded tools to handle many common challenges. If you're looking to kickstart a project with Next.js 14 and need a reliable authentication setup, feel free to explore it. I'm always open to hearing about different approaches or improvements!
+
+
+### Repo: 
+[Next.js Auth Starter](https://github.com/berkaysson/nextjs-auth-starter)

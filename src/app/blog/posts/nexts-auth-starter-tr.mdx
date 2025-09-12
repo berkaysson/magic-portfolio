@@ -1,0 +1,70 @@
+---
+title: "Bir Authentication Starter Oluşturma Süreci: Next.js, PostgreSQL, Prisma ve NextAuth'u Entegre Etmekten Öğrendiklerim"
+summary: "Yakın zamanda Next.js 14'te kullanıcı kimlik doğrulamasını ele alan bir starter uygulaması hazırladım, PostgreSQL, Prisma ve NextAuth'u birleştiriyordum. Bu yazı, web uygulamaları için güvenilir bir temel oluşturmak amacıyla bu araçları entegre etme yaklaşımımı paylaşıyor."
+publishedAt: "2024-07-15"
+tag: "#Nextjs #Authentication #WebDevelopment #CleanCode"
+---
+
+# Bir Authentication Starter Oluşturma Süreci: Next.js, PostgreSQL, Prisma ve NextAuth'u Entegre Etmekten Öğrendiklerim
+
+Yeni bir web projesi başlatırken, kullanıcı kimlik doğrulamasını kurmak genellikle önemli bir başlangıç engeli gibi hissedilebilir. Birçok bileşen söz konusudur: kullanıcı verilerini yönetmek, route'ları güvence altına almak, farklı giriş yöntemlerini ele almak ve her şeyi type-safe tutmak. Amacım, gelecekteki projeler için sağlam bir başlangıç noktası yaratmaktı, bu karmaşıklıkları her seferinde kapsamlı kurulum gerektirmeden ele alan bir çözüm. Bu beni bir Next.js authentication starter uygulaması geliştirmeye yöneltti ve süreçten edindiğim bazı görüşleri paylaşmak istiyorum.
+
+## Temel: Neden Bu Teknolojiler?
+
+Proje, bireysel güçlü yönleri ve birlikte ne kadar iyi çalıştıkları için seçilmiş birkaç temel teknoloji üzerine kuruldu. Bu teknolojiler ayrıca umut verici ve gelecekleri güvence altında.
+
+### Next.js
+
+Uygulama framework'ü olarak **Next.js 14**'ü seçtim. App Router yapısı, özellikle server-side rendered uygulamalar için route tanımlama ve veri getirmeyi çok daha net hale getiriyor. Birçok yaygın web geliştirme görevini basitleştiren modern bir yaklaşım sunuyor.
+
+### PostgreSQL & Prisma
+
+Veri yönetimi için **PostgreSQL** ve **Prisma** implemente ettim. PostgreSQL, istikrarıyla tanınan, yaygın olarak kullanılan bir ilişkisel veritabanıdır. ORM olarak Prisma, veritabanı etkileşimlerini önemli ölçüde basitleştirir. Model tanımlama ve sorgu gerçekleştirme için type-safe bir yol sağlar, bu da geliştirici deneyimi ve potansiyel hataları azaltma açısından büyük bir kazançtı. Veritabanı şemamı `prisma/schema.prisma`'da tanımlamak ve Prisma migration'larını kullanmak, değişiklikleri yönetmek için doğal bir uyum hissettirdi.
+
+### NextAuth.js
+
+**NextAuth.js** temel authentication mantığını ele alır. Session yönetimi, sosyal girişler (Google ve GitHub gibi) ve callback işleme karmaşıklığının çoğunu soyutlar. Bu `auth.config.ts`'de yapılandırmak, provider'ları ve özel callback'leri kolayca tanımlamama olanak sağladı.
+
+### Ek Araçlar
+
+*   **Resend**: Doğrulama ve şifre sıfırlama ile ilgili e-postalar göndermek için. Geliştirici dostu API'si için seçildi.
+*   **Tailwind CSS & ShadCN**: Bir kullanıcı arayüzünü hızlıca ayağa kaldırmak için. Tailwind CSS hızlı stil vermeye yardımcı olur ve ShadCN bunun üzerine kurulmuş erişilebilir bileşenler koleksiyonu sağlar.
+*   **Zod**: Form validasyonu için. `schemas/` içinde şemalar tanımlamak, veri girişlerimin her zaman doğru formatlanmış ve type-safe olmasını sağladı, birçok yaygın form ile ilgili sorunu önledi.
+*   **bcryptjs**: Şifre şifreleme için, kritik bir güvenlik önlemi.
+
+## Odaklandığım Temel Özellikler
+
+Bu starter uygulaması, yaygın authentication ihtiyaçlarını karşılamak için tasarlanmış birkaç özellik içerir:
+
+*   **Kullanıcı Formları**: Hem email/şifre hem de sosyal girişleri (Google, GitHub) destekleyen giriş, doğrulama, şifre güncelleme, şifre sıfırlama ve kayıt sayfaları.
+*   **Korumalı Route'lar**: `/settings` gibi uygulamanın belirli bölümlerine erişime izin vermeden önce kullanıcı oturumlarını kontrol etmek için `middleware.ts` implement etmek. Kullanıcı, yen iuygulama sayfalarını buraya eklemeli.
+*   **Email Doğrulama & Şifre Sıfırlama**: Bu akışlar için güvenli token'lar üretmek ve e-posta göndermek için Resend kullandım.
+*   **Veri İşleme**: Veritabanı mutasyonları için `actions/` ve okuma işlemleri için `data/` arasında net bir ayrım var ve bu ileriye dönük kolay adaptasyon sağlıyor, kullanıcı data içerisinde kendi istediği veri çekme araçlarını kullanabilir.
+
+## Proje Nasıl Organize Edildi
+
+Proje düzenini anlamak, onu oluşturmak için önemliydi ve onu genişletecek herkes için de önemli olacak.
+
+*   **`app/`**: `/` ve `/auth/login` gibi public route'lar ve `/(protected)/settings` gibi korumalı route'lar dahil tüm route tanımlarını içerir. App router.
+*   **`actions/`**: Yeni kullanıcı oluşturma veya profil güncelleme gibi işlemler için veritabanına bağlanan server action'ların yaşadığı yer.
+*   **`data/`**: Veritabanından veri getirme fonksiyonları, tipik olarak sadece okuma.
+*   **`components/`**: Arayüzü tutarlı tutan yeniden kullanılabilir UI elemanlarım.
+*   **`lib/`**: Genel yardımcı araçlar ve helper'lar.
+*   **`prisma/`**: Veritabanı modelleri ve migration'lar için Prisma şemasını ve üretilen client'ı tutar.
+*   **`schemas/`**: Veri bütünlüğünü sağlayan tüm Zod validation şemaları.
+*   **`middleware.ts`**: Route koruması ve authentication kontrolleri işler.
+*   **`auth.config.ts`**: Provider'lar ve callback'ler dahil NextAuth yapılandırma detayları.
+
+## Görüşler ve Öğrenilen Dersler
+
+Bunu bir araya getirmekten edindiğim temel çıkarımlardan biri, Zod ile açık veri validasyonunun gücüydü. Hataları erken yakalamaya ve form girişleri için net geri bildirim sağlamaya gerçekten yardımcı oldu. `actions/` ve `data/` arasında endişeleri ayırmak da server-side mantığını proje büyüdükçe anlamayı ve maintain etmeyi çok daha kolay hale getirdi. Kullanıcı veri getirme için tanstack query veya useSwr kullanabilir, starter pack kullanıcının gidebileceği her olası yolu açar.
+
+Alternatifleri düşündüğümde, neon gibi farklı ORM'leri değerlendirdim, ancak Prisma'nın TypeScript ile type-safety'si kullanımı için güçlü bir sebep ve ayrıca kullanımı çok kolaydı. Neon'un ile başlamaya çok yakındım ancak bir starter kit için raw SQL benzeri ve fazla kompleksdi. E-posta gönderme için birçok seçenek var, ancak Resend'in API'si token üretimi entegrasyonu için iyi çalıştı. Bu parçaları değiştirmek ve alternatif kullanmak çok kolay.
+
+## Sonuç
+
+Bu Next.js authentication starter projesi, kullanıcı kimlik doğrulamasına ihtiyaç duyan uygulamalar için sağlam bir başlangıç noktası sunmak üzere tasarlandı. Birçok yaygın zorluğu ele almak için saygın araçları bir araya getiriyor. Next.js 14 ile bir projeyi hızla başlatmak istiyorsanız ve güvenilir bir authentication kurulumuna ihtiyacınız varsa, bunu keşfetmekten çekinmeyin. Farklı yaklaşımlar veya iyileştirmeler hakkında görüş almaya her zaman açığım!
+
+
+### Repo: 
+[Next.js Auth Starter](https://github.com/berkaysson/nextjs-auth-starter)
