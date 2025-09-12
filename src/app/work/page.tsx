@@ -56,7 +56,7 @@ export default function Work() {
                 size="m"
               />
             )}
-            Discover my other projects
+            Discover my other personal projects
             <IconButton
               key={social[0].name}
               href={social[0].link}
