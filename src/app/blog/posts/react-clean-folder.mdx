@@ -19,6 +19,7 @@ src/
 ├── auth/
 ├── components/
 ├── constants/
+├── types/
 ├── hooks/
 ├── layouts/
 ├── locales/
@@ -28,6 +29,7 @@ src/
 ├── routes/
 ├── sections/
 ├── services/
+├── store/
 ├── theme/
 └── utils/
 ```
@@ -48,6 +50,10 @@ src/
 
 * **`constants/`**
   Stores fixed values you might need throughout your app, like dropdown options, role lists, or status values. Unlike mock data, these are not just for testing—they're actual values your app depends on.
+
+
+* **`types/`**
+  If you’re using TypeScript, this folder is great for storing global type definitions, enums, and interfaces (instead of scattering them in random files).
 
 * **`hooks/`**
   A place for custom hooks that solve specific problems or add features to your components. Examples: `useClipboard`, `useResponsive`, or a custom `useDebounce`.
@@ -73,6 +79,9 @@ src/
 * **`services/`**
   Contains simple functions that call your API using the Axios instance from `api/`. For example, `postBlogPost(data)` or `getUserInfo()`. Think of this as the layer between your UI and the backend. You can use this services in queries/.
 
+* **`store/`**
+  If you’re using a state management library (Redux, Zustand, Recoil, Jotai, etc.), keep your global stores, slices, and related logic here. This prevents mixing state with hooks/.
+
 * **`theme/`**
   Stores your theme setup—color schemes, typography, spacing, fonts etc. It can include your MUI theme, dark/light mode settings, and theme providers.
 
@@ -84,8 +93,3 @@ src/
 Using this structure keeps your project clean, modular, and easy to grow. It separates responsibilities well, so you're not stuffing everything into one or two folders. You can tweak it to fit your team’s style, but this setup is a solid starting point for most medium to large React projects.
 
 ---
-
-<div style={{display: 'flex', justifyContent: 'center'}}>
-  <img src="/images/blogs/folder-structure.png" alt="Folder Structure" style={{ maxHeight: "500px" }} />
-</div>
-

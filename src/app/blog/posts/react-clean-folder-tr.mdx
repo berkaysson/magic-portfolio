@@ -1,0 +1,94 @@
+---
+title: "Temiz Bir React Klasör Yapısı"
+summary: "Temiz ve modüler bir React klasör yapısı, kodunuzu organize tutmanıza, ölçeklenebilir hale getirmenize ve uygulamanız büyüdükçe bakımını kolaylaştırmanıza yardımcı olur."
+publishedAt: "2025-06-07"
+tag: "#CleanCode"
+---
+
+# Temiz Bir React Klasör Yapısı
+
+Bir React uygulaması geliştirirken, iyi organize edilmiş bir klasör yapısına sahip olmak her şeyi kolaylaştırır—dosyaları bulmak, kodu maintain etmek, uygulamanızı ölçeklendirmek ve yeni geliştiricileri projeye dahil etmek. İşte birçok ekip için iyi çalışan bir klasör düzeni ve her klasörün ne yaptığına dair hızlı açıklamalar.
+Her klasörü kullanmanız şart değil ancak uygulamayı zamanla ölçeklendirirken bu tür klasör yapısına sahip projeyi adapte etmek daha kolaydır.
+
+## Klasör Yapısı
+
+```
+src/
+│
+├── api/
+├── auth/
+├── components/
+├── constants/
+├── types/
+├── hooks/
+├── layouts/
+├── locales/
+├── mock/
+├── pages/
+├── queries/
+├── routes/
+├── sections/
+├── services/
+├── store/
+├── theme/
+└── utils/
+```
+
+### Klasör Açıklamaları
+
+* **`mock/`**
+  Bu klasör, geliştirme veya test sırasında kullanılan mock verileri koyduğunuz yerdir. API'niz hazır olmadan önce backend yanıtlarını simüle etmek için harikadır. Geliştirme sırasında ihtiyaç duyabileceğiniz dummy blog postları, kullanıcı verileri veya herhangi bir örnek içerik tanımlayabilirsiniz.
+
+* **`api/`**
+  Burada Axios instance'ınızı kurar ve base URL'ler veya interceptor'lar gibi global yapılandırmaları tanımlarsınız. Tüm HTTP kurulumunuzun yaşadığı merkezi yer, gerçek request fonksiyonlarından ayrı.
+
+* **`auth/`**
+  Kimlik doğrulama ile ilgili her şeyi halleder. Bu, token'ları saklama, login/logout mantığını yönetme ve kullanıcı context'ini kurma işlemlerini içerir. Temel olarak, kullanıcının giriş yapıp yapmadığını ve kim olduğunu takip eden her şey.
+
+* **`components/`**
+  Button, input, modal, form alanları gibi paylaşılan, yeniden kullanılabilir UI bileşenlerini içerir. Bunlar, uygulamanın farklı bölümlerinde kullanılan yapı taşlarınızdır.
+
+* **`constants/`**
+  Dropdown seçenekleri, rol listeleri veya durum değerleri gibi uygulamanız boyunca ihtiyaç duyabileceğiniz sabit değerleri saklar. Mock verilerden farklı olarak, bunlar sadece test için değil—uygulamanızın bağımlı olduğu gerçek değerlerdir.
+
+* **`types/`**
+  TypeScript kullanıyorsanız, bu klasör global tip tanımları, enum'lar ve interface'leri saklamak için harika (bunları rastgele dosyalara dağıtmak yerine).
+
+* **`hooks/`**
+  Belirli sorunları çözen veya bileşenlerinize özellikler ekleyen custom hook'lar için bir yer. Örnekler: `useClipboard`, `useResponsive`, veya custom `useDebounce`.
+
+* **`layouts/`**
+  Bu klasör sidebar, header, footer ve farklı sayfa tipleri için wrapper'lar gibi layout bileşenlerini içerir. Admin ve public görünümler veya farklı navigasyon tipleri gibi birden fazla layout varyasyonunuz olduğunda kullanışlıdır.
+
+* **`locales/`**
+  Çevirileri ve locale ile ilgili ayarları yönetmek için kullanılır. Dayjs veya MUI date adapter'ları, dil context'leri ve diğer uluslararasılaştırma (i18n) mantığını da burada saklayabilirsiniz.
+
+* **`pages/`**
+  Next.js veya diğer router tabanlı kurulumlar gibi, bu uygulamanızın sayfalarının yapısını tanımlar. Ancak, bu dosyalar hafiftir ve tam sayfa içeriği içermez—sadece route varlığı ve bazen minimal kurulum. Gerçek içerik `sections/` klasöründe işlenir. Bu şekilde artan sayfa sayısı ile uygulamanızı ölçeklendirmek daha kolay olur.
+
+* **`queries/`**
+  [TanStack Query (React Query)](https://tanstack.com/query) kullanıyorsanız, query ve mutation hook'larınızı burada tutacaksınız. Data-fetching mantığınızı ve caching'i tek yerde organize etmeye yardımcı olur.
+
+* **`routes/`**
+  Burada React Router (veya başka bir router) kullanarak uygulamanızın route'larını tanımlarsınız. Rol tabanlı erişim, lazy load'lar ve navigation guard'larını da burada yönetebilirsiniz. `pages/`'teki şeyleri gerçek routing kurulumuna bağlar.
+
+* **`sections/`**
+  Her sayfanın gerçek içeriğinin oluşturulduğu yer. Büyük uygulamalar için her sayfa için klasörler oluşturarak `components/`'i `sections/` içinde compose ederek her sayfanın yapısını ve mantığını oluşturursunuz, diğer blokları içeren view'lar oluşturabilir ve bunları pages'te kullanabilirsiniz. Bu, `pages/`'inizi temiz tutar ve sadece routing'e odaklanmasını sağlar.
+
+* **`services/`**
+  `api/`'den Axios instance'ını kullanarak API'nizi çağıran basit fonksiyonları içerir. Örneğin, `postBlogPost(data)` veya `getUserInfo()`. Bunu UI'nız ve backend arasındaki katman olarak düşünün. Bu servisleri queries/ içinde kullanabilirsiniz.
+
+* **`store/`**
+  Bir state management kütüphanesi (Redux, Zustand, Recoil, Jotai, vb.) kullanıyorsanız, global store'larınızı, slice'larınızı ve ilgili mantığınızı burada tutun. Bu, state'i hooks/ ile karıştırmayı önler.
+
+* **`theme/`**
+  Theme kurulumunuzu saklar—renk şemaları, tipografi, spacing, fontlar vb. MUI theme'inizi, dark/light mod ayarlarınızı ve theme provider'larını içerebilir.
+
+* **`utils/`**
+  Tarihleri formatlama, girdi doğrulama veya değerleri dönüştürme gibi yaygın görevlerde yardımcı olan genel utility fonksiyonları. Bunlar genellikle uygulama boyunca yeniden kullanılan küçük, pure fonksiyonlardır.
+
+---
+
+Bu yapıyı kullanmak projenizi temiz, modüler ve büyümeye hazır tutar. Sorumlulukları iyi ayırır, böylece her şeyi bir veya iki klasöre tıkıştırmazsınız. Ekibinizin stiline uyacak şekilde ayarlayabilirsiniz, ancak bu kurulum çoğu orta ve büyük React projesi için sağlam bir başlangıç noktasıdır.
+
+---
