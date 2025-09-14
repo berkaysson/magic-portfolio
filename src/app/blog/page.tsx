@@ -1,4 +1,4 @@
-import { Column, Heading } from "@/once-ui/components";
+import { Button, Column, Heading } from "@/once-ui/components";
 import { Mailchimp } from "@/components";
 import { Posts } from "@/components/blog/Posts";
 import { baseURL } from "@/app/resources";
@@ -15,7 +15,12 @@ export async function generateMetadata() {
   });
 }
 
-export default function Blog() {
+export default async function Blog({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: "en" | "tr" | null }>;
+}) {
+  const { lang = "en" } = await searchParams;
   return (
     <Column maxWidth="s">
       <Schema
@@ -34,12 +39,28 @@ export default function Blog() {
       <Heading marginBottom="l" variant="display-strong-s">
         {blog.title}
       </Heading>
-      <Column
-				fillWidth flex={1}>
-				<Posts range={[1,1]} thumbnail direction="column"/>
-				<Posts range={[2,3]} thumbnail/>
-				<Posts range={[4]} columns="2"/>
-			</Column>
+
+      <Column fillWidth flex={1}>
+        <Button
+          data-border="rounded"
+          href={`/blog${lang === "en" ? "?lang=tr" : ""}`}
+          weight="default"
+          variant="primary"
+          size="s"
+          suffixIcon="globe"
+          style={{ marginBottom: 24 }}
+        >
+          {lang === "tr" ? "Read English Posts" : "Türkçe Paylaşımları Oku"}
+        </Button>
+        <Posts
+          lang={lang || "en"}
+          range={[1, 1]}
+          thumbnail
+          direction="column"
+        />
+        <Posts lang={lang || "en"} range={[2, 3]} thumbnail />
+        <Posts lang={lang || "en"} range={[4]} columns="2" />
+      </Column>
       {newsletter.display && <Mailchimp newsletter={newsletter} />}
     </Column>
   );
