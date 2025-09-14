@@ -6,6 +6,7 @@ import { blog, person, newsletter } from "@/app/resources/content";
 import { Meta, Schema } from "@/once-ui/modules";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 export async function generateMetadata() {
   return Meta.generate({
