@@ -1,10 +1,9 @@
-import { Button, Column, Heading, Row } from "@/once-ui/components";
+import { Column, Heading } from "@/once-ui/components";
 import { Mailchimp } from "@/components";
 import { Posts } from "@/components/blog/Posts";
 import { baseURL } from "@/app/resources";
 import { blog, person, newsletter } from "@/app/resources/content";
 import { Meta, Schema } from "@/once-ui/modules";
- 
 
 export async function generateMetadata() {
   return Meta.generate({
@@ -16,11 +15,7 @@ export async function generateMetadata() {
   });
 }
 
-export default function Blog({ searchParams }: { searchParams?: { [key: string]: string | string[] | undefined } }) {
-  const rawLang = searchParams?.lang;
-  const langFromQuery = Array.isArray(rawLang) ? rawLang[0] : rawLang;
-  const selectedLang = (langFromQuery === 'tr' ? 'tr' : 'en') as 'en' | 'tr';
-
+export default function Blog() {
   return (
     <Column maxWidth="s">
       <Schema
@@ -36,36 +31,14 @@ export default function Blog({ searchParams }: { searchParams?: { [key: string]:
           image: `${baseURL}${person.avatar}`,
         }}
       />
-      <Row fillWidth vertical="center" marginBottom="l" gap="8" horizontal="space-between">
-        <Heading variant="display-strong-s">
-          {blog.title}
-        </Heading>
-        <Row gap="8">
-          <Button
-            data-border="rounded"
-            href={`?lang=en`}
-            variant={selectedLang === 'en' ? 'primary' : 'tertiary'}
-            weight={selectedLang === 'en' ? 'strong' : 'default'}
-            size="s"
-          >
-            English
-          </Button>
-          <Button
-            data-border="rounded"
-            href={`?lang=tr`}
-            variant={selectedLang === 'tr' ? 'primary' : 'tertiary'}
-            weight={selectedLang === 'tr' ? 'strong' : 'default'}
-            size="s"
-          >
-            Türkçe
-          </Button>
-        </Row>
-      </Row>
+      <Heading marginBottom="l" variant="display-strong-s">
+        {blog.title}
+      </Heading>
       <Column
 				fillWidth flex={1}>
-				<Posts range={[1,1]} thumbnail direction="column" lang={selectedLang}/>
-				<Posts range={[2,3]} thumbnail lang={selectedLang}/>
-				<Posts range={[4]} columns="2" lang={selectedLang}/>
+				<Posts range={[1,1]} thumbnail direction="column"/>
+				<Posts range={[2,3]} thumbnail/>
+				<Posts range={[4]} columns="2"/>
 			</Column>
       {newsletter.display && <Mailchimp newsletter={newsletter} />}
     </Column>

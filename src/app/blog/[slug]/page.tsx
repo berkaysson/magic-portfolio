@@ -43,15 +43,11 @@ export default async function Blog({
   const routeParams = await params;
   const slugPath = Array.isArray(routeParams.slug) ? routeParams.slug.join('/') : routeParams.slug || '';
 
-  const allPosts = getPosts(["src", "app", "blog", "posts"]);
-  let post = allPosts.find((post) => post.slug === slugPath);
+  let post = getPosts(["src", "app", "blog", "posts"]).find((post) => post.slug === slugPath);
 
   if (!post) {
     notFound();
   }
-
-  const counterpartSlug = post.slug.endsWith("-tr") ? post.slug.replace(/-tr$/, "") : `${post.slug}-tr`;
-  const hasCounterpart = allPosts.some((p) => p.slug === counterpartSlug);
 
   const avatars =
     post.metadata.team?.map((person) => ({
@@ -78,16 +74,9 @@ export default async function Blog({
               image: `${baseURL}${person.avatar}`,
             }}
           />
-          <Row gap="8">
-            <Button data-border="rounded" href="/blog" weight="default" variant="tertiary" size="s" prefixIcon="chevronLeft">
-              Posts
-            </Button>
-            {hasCounterpart && (
-              <Button data-border="rounded" href={`/blog/${counterpartSlug}`} weight="strong" variant="primary" size="s">
-                {post.slug.endsWith("-tr") ? "English" : "Türkçe"}
-              </Button>
-            )}
-          </Row>
+          <Button data-border="rounded" href="/blog" weight="default" variant="tertiary" size="s" prefixIcon="chevronLeft">
+            Posts
+          </Button>
           <Heading variant="display-strong-s">{post.metadata.title}</Heading>
           <Row gap="12" vertical="center">
             {avatars.length > 0 && <AvatarGroup size="s" avatars={avatars} />}
