@@ -5,9 +5,6 @@ import { baseURL } from "@/app/resources";
 import { blog, person, newsletter } from "@/app/resources/content";
 import { Meta, Schema } from "@/once-ui/modules";
 
-export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
-
 export async function generateMetadata() {
   return Meta.generate({
     title: blog.title,
@@ -18,12 +15,7 @@ export async function generateMetadata() {
   });
 }
 
-export default async function Blog({
-  searchParams,
-}: {
-  searchParams: Promise<{ lang?: "en" | "tr" | null }>;
-}) {
-  const { lang = "en" } = await searchParams;
+export default async function Blog() {
   return (
     <Column maxWidth="s">
       <Schema
@@ -46,23 +38,23 @@ export default async function Blog({
       <Column fillWidth flex={1}>
         <Button
           data-border="rounded"
-          href={`/blog${lang === "en" ? "?lang=tr" : ""}`}
+          href="/blog-tr"
           weight="default"
           variant="primary"
           size="s"
           suffixIcon="globe"
           style={{ marginBottom: 24 }}
         >
-          {lang === "tr" ? "Read English Posts" : "Türkçe Paylaşımları Oku"}
+          Türkçe Paylaşımları Oku
         </Button>
         <Posts
-          lang={lang || "en"}
+          lang="en"
           range={[1, 1]}
           thumbnail
           direction="column"
         />
-        <Posts lang={lang || "en"} range={[2, 3]} thumbnail />
-        <Posts lang={lang || "en"} range={[4]} columns="2" />
+        <Posts lang="en" range={[2, 3]} thumbnail />
+        <Posts lang="en" range={[4]} columns="2" />
       </Column>
       {newsletter.display && <Mailchimp newsletter={newsletter} />}
     </Column>
