@@ -244,7 +244,7 @@ export default function About() {
                     </Text>
                     <Column as="ul" gap="16">
                       {experience.achievements.map(
-                        (achievement: JSX.Element, index: number) => (
+                        (achievement: string, index: number) => (
                           <Text
                             as="li"
                             variant="body-default-m"

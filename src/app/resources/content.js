@@ -155,26 +155,31 @@ const about = {
         title: "Frontend & Performance",
         description:
           "JavaScript/TypeScript, React, Next.js. Expertise in TanStack Query (caching, optimistic updates), code splitting, and custom hooks.",
+        images: [],
       },
       {
         title: "Backend & Security",
         description:
           "ASP.NET / C#, Entity Framework Core. Implemented JWT, Identity, and role-based access control for security.",
+        images: [],
       },
       {
         title: "Database & ORMs",
         description:
           "PostgreSQL (Prisma, Supabase) and MSSQL (Entity Framework Core).",
+        images: [],
       },
       {
         title: "DevOps & Tools",
         description:
           "Azure, Git/GitHub, Jenkins, Agile methods (Jira, Confluence, Trello).",
+        images: [],
       },
       {
         title: "UI/UX & Testing",
         description:
           "Material UI, Tailwind CSS, Shadcn UI. Unit testing with Jest, ESLint, and Prettier.",
+        images: [],
       },
     ],
   },
