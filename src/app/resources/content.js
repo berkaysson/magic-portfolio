@@ -48,33 +48,25 @@ const home = {
   path: "/",
   image: "/images/og/home.jpg",
   label: "Home",
-  title: `Berkay Sonel's Portfolio`,
-  description: `Portfolio website showcasing my work as a Full Stack Developer`,
-  headline: <>Bridging frontend elegance with backend power</>,
+  title: "Berkay Sonel - Frontend Developer",
+  description:
+    "Results-driven Frontend Developer with 2+ years building high-performance, responsive web applications.",
+  headline: "Architecting Scalable Web Solutions",
   featured: {
     display: true,
-    title: (
-      <>
-        Recent project: <strong className="ml-4">Habivita</strong>
-      </>
-    ),
+    title: "Featured Project: Habivita (SaaS Productivity App)",
     href: "/work/habivita",
   },
-  subline: (
-    <>
-      I'm Berkay, a full stack developer based in Ankara, Turkey. I'm crafting
-      clean, scalable apps with <br />
-      Next.js, React, and .NET. I love turning ideas into full-featured
-      platforms.
-    </>
-  ),
+  subline:
+    "I'm Berkay, a results-driven Frontend Developer with Full Stack Capabilities. I specialize in crafting scalable, high-performance UIs and delivering solutions that integrate complex frontend-backend systems.",
 };
 
 const about = {
   path: "/about",
   label: "About",
-  title: `About – Berkay Sonel`,
-  description: `Meet Berkay Sonel, Full Stack Developer from Ankara, Etimesgut`,
+  title: "About – Berkay Sonel",
+  description:
+    "Berkay Sonel, a results-driven Frontend Developer specializing in high-performance web applications based in Ankara, Turkey.",
   tableOfContent: {
     display: true,
     subItems: true,
@@ -84,49 +76,37 @@ const about = {
   },
   calendar: {
     display: false,
-    link: "https://cal.com", // Update if you have a personal calendar link
+    link: "https://cal.com",
   },
   intro: {
     display: true,
     title: "Introduction",
-    description: (
-      <>
-        Berkay is a Full Stack Developer based in Ankara with ~2 years of
-        experience building dynamic and scalable web applications. He
-        specializes in React, Next.js, and ASP.NET Core, and enjoys building
-        tools that blend performance with clean design.
-      </>
-    ),
+    description:
+      "Berkay is a results-driven Frontend Developer with 2+ years of experience building high-performance, responsive web applications. He is proficient in leading development initiatives, optimizing performance (code splitting, caching), and integrating complex systems using React, Next.js, and ASP.NET.", // Team Leader concept softened to "leading development initiatives"
   },
   work: {
     display: true,
-    title: "Work Experience",
+    title: "Professional Experience",
     experiences: [
       {
         company: "Siem Group",
         timeframe: "Jun 2024 – Present",
-        role: "Frontend Developer | Team Leader",
+        role: "Frontend Developer | Team Leader", // Title remains here
         achievements: [
-          <>
-            Led frontend development of HRM software with complex modules and
-            backend integrations.
-          </>,
-          <>
-            Mentored interns, enforced best practices, and optimized performance
-            with TanStack Query and Axios.
-          </>,
+          "Directed frontend implementation of a modular Human Resources Management Application (ikbox.tr) using React.js and Material UI.",
+          "Optimized 200+ API integrations using TanStack Query, cutting API latency by 200ms on average.",
+          "Architected 100+ responsive screens, implementing lazy loading and code splitting to improve performance.",
+          "Guided 5+ interns through code reviews and technical feedback, ensuring a scalable React.js codebase.",
         ],
         images: [],
       },
       {
-        company: "Pay Gençlik Association",
+        company: "Pay Gençlik Association (Volunteer)",
         timeframe: "Mar 2024 – Jun 2024",
         role: "Volunteer Software Developer",
         achievements: [
-          <>
-            Redesigned the organization website with WordPress and custom CSS.
-          </>,
-          <>Handled technical issues and conducted new member interviews.</>,
+          "Rapidly delivered and deployed the association's website, enhancing usability for non-technical content management.",
+          "Provided technical support and contributed to member recruitment by interviewing new members.",
         ],
         images: [],
       },
@@ -135,13 +115,9 @@ const about = {
         timeframe: "Jul 2023 – Jan 2024",
         role: "Intern Full Stack Developer",
         achievements: [
-          <>
-            Built RESTful APIs with ASP.NET Core and integrated React-based UIs.
-          </>,
-          <>
-            Implemented JWT authentication and role-based access, completed Ctrl
-            + Future Program.
-          </>,
+          "Developed RESTful APIs with ASP.NET Core and integrated them with React-based frontends.",
+          "Implemented role-based authentication using Identity, JWT, and EF Core to secure systems.",
+          "Gained hands-on expertise in Agile/Scrum, Azure, and React.js during the program.",
         ],
         images: [],
       },
@@ -149,64 +125,56 @@ const about = {
   },
   studies: {
     display: true,
-    title: "Studies",
+    title: "Education & Certifications",
     institutions: [
       {
         name: "Selçuk University",
-        description: <>Master’s in Computer Engineering (Ongoing-2026)</>,
-      },
-      {
-        name: "Ctrl + Future Program – Koç Holding & Microsoft Türkiye",
-        description: (
-          <>
-            Completed intensive bootcamp focused on Agile, Azure, and
-            frontend/backend web dev.
-          </>
-        ),
+        description:
+          "Master’s in Computer Engineering (Ongoing - 2026) – GPA: 3.82",
       },
       {
         name: "Çankaya University",
-        description: <>Bachelor's in Civil Engineering (GPA: 2.9)</>,
+        description: "Bachelor's in Civil Engineering (2023) – GPA: 2.9",
+      },
+      {
+        name: "Koç Holding A.Ş.",
+        description:
+          "Frontend Developer Program (2023) – Intensive bootcamp focused on Agile, Azure, and full-stack web dev.",
+      },
+      {
+        name: "Microsoft",
+        description: "Azure Fundamentals Certification (2023)",
       },
     ],
   },
   technical: {
     display: true,
-    title: "Technical skills",
+    title: "Technical Expertise",
     skills: [
       {
-        title: "React & Next.js",
-        description: (
-          <>
-            Building fast UIs with React, TanStack, and full-stack power via
-            Next.js.
-          </>
-        ),
-        images: [],
+        title: "Frontend & Performance",
+        description:
+          "JavaScript/TypeScript, React, Next.js. Expertise in TanStack Query (caching, optimistic updates), code splitting, and custom hooks.",
       },
       {
-        title: "ASP.NET Core & C#",
-        description: (
-          <>Developing RESTful Web APIs with .NET, EF Core, and JWT.</>
-        ),
-        images: [],
+        title: "Backend & Security",
+        description:
+          "ASP.NET / C#, Entity Framework Core. Implemented JWT, Identity, and role-based access control for security.",
       },
       {
-        title: "PostgreSQL & Prisma | MsSQL & Entity Framework",
-        description: (
-          <>
-            Database design and ORM handling for modern apps with PostgreSQL and
-            Prisma or MsSQL and Entity Framework.
-          </>
-        ),
-        images: [],
+        title: "Database & ORMs",
+        description:
+          "PostgreSQL (Prisma, Supabase) and MSSQL (Entity Framework Core).",
       },
       {
-        title: "UI Libraries",
-        description: (
-          <>Styled Components, Tailwind CSS, Material UI, and ShadcnUI.</>
-        ),
-        images: [],
+        title: "DevOps & Tools",
+        description:
+          "Azure, Git/GitHub, Jenkins, Agile methods (Jira, Confluence, Trello).",
+      },
+      {
+        title: "UI/UX & Testing",
+        description:
+          "Material UI, Tailwind CSS, Shadcn UI. Unit testing with Jest, ESLint, and Prettier.",
       },
     ],
   },
@@ -243,6 +211,16 @@ const gallery = {
     },
     {
       src: "/images/gallery/habivita-feat.webp",
+      alt: "Habivita feature overview",
+      orientation: "horizontal",
+    },
+    {
+      src: "/images/gallery/habivita-insight.webp",
+      alt: "Habivita Progress screen",
+      orientation: "horizontal",
+    },
+    {
+      src: "/images/gallery/habivita-feat-3.webp",
       alt: "Habivita feature overview",
       orientation: "horizontal",
     },
