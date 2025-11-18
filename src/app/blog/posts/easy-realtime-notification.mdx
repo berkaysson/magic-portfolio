@@ -1,0 +1,272 @@
+---
+title: "Easy Real-Time Notification System Setup From Scratch (Next.js + Supabase)"
+summary: "I will show you how to add ultra-fast and simple real-time notifications to your Next.js application in three easy steps."
+publishedAt: "2025-11-18"
+tag: "#Next #Supabase #Prisma"
+---
+
+Don't let building a **persistent and instant notification system** intimidate you. In this guide, I'll show you how to add ultra-fast and simple real-time notifications to your Next.js application in three easy steps: (1. Model, 2. Backend Triggering, 3. Real-time Subscription). With **Prisma** and **Supabase Realtime**, this process is much easier and more manageable than you might think.
+
+## 1\. Database Model and Backend Triggering Mechanism
+
+### 1.1. Prisma Notification Model
+
+First, we need to define a database table to store the created notifications. I'm using **Prisma ORM** and have created the following model corresponding to the `notifications` table. Notifications in my application are triggered whenever an **appointment** is created or updated.
+
+The notification types and database schema are defined in the model below. Note that we are using **`@map`** to customize the column names in Supabase.
+
+```typescript
+enum NotificationType {
+  APPOINTMENT_CREATED
+  APPOINTMENT_CANCELLED
+  APPOINTMENT_CONFIRMED
+  APPOINTMENT_UPDATED
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String           @map("user_id")
+  type      NotificationType
+  title     String
+  message   String           @db.Text
+  read      Boolean          @default(false)
+  
+  appointmentId    String?  @map("appointment_id") // Can be null if the appointment is deleted
+  organizationId   String   @map("organization_id")
+  
+  metadata  Json? // For additional data
+  
+  createdAt DateTime         @default(now()) @map("created_at")
+  readAt    DateTime?        @map("read_at")
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read, createdAt]) // Critical for fetching a user's unread notifications quickly
+  @@map("notifications")
+}
+```
+
+### 1.2. Backend Notification Creation Process
+
+After the database **migration** is complete, we integrate the notification creation process into all necessary business logic flows. The example below demonstrates the notification created after an appointment is cancelled:
+
+```typescript
+// The appointment status is updated to CANCELLED.
+await db.appointment.update({
+  where: { id: appointmentId },
+  data: {
+    status: AppointmentStatus.CANCELLED,
+    cancellationReason: cancellationReason || null,
+  },
+});
+
+// A notification is sent to the organization owner and members.
+const userName = appointment.user.name || appointment.user.email || "A user";
+const formattedStartTime = appointment.startTime.toLocaleString();
+const notificationTitle = "Appointment Cancelled";
+const notificationMessage = `${userName} has cancelled the appointment "${
+  appointment.title
+}" scheduled for ${formattedStartTime} in ${appointment.organization.name}.${
+  cancellationReason ? ` Reason: ${cancellationReason}` : ""
+}`;
+
+await createOrganizationNotifications(
+  appointment.organizationId,
+  appointment.id,
+  NotificationType.APPOINTMENT_CANCELLED,
+  notificationTitle,
+  notificationMessage
+);
+```
+
+After this process, a new record is created in the `notifications` table. **Now, we can move on to the real-time subscription part.**
+
+-----
+
+## 2\. Supabase Client and Real-time Subscription Setup
+
+### 2.1. Creating the Supabase Client (Singleton Pattern)
+
+We need to install the Supabase SDK and create a client. Here, we use the **Singleton Pattern** to ensure the client is created only once throughout the application's lifecycle. The Supabase URL and anon key can be sourced from environment variables.
+
+```typescript
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
+
+// Module-level variable to hold the client instance
+let supabase: SupabaseClient | null = null;
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+/**
+ * Creates a Supabase client for client-side use.
+ */
+export const createSupabaseClient = () => {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error(
+      "Missing Supabase environment variables: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are required"
+    );
+  }
+
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    realtime: {
+      params: {
+        eventsPerSecond: 10, // Limit for Real-time events
+      },
+    },
+  });
+};
+
+/**
+ * Get a Supabase client instance (Singleton).
+ * This creates the client *only* on the first call and reuses it thereafter.
+ */
+export const getSupabaseClient = () => {
+  if (!supabase) {
+    supabase = createSupabaseClient();
+  }
+  return supabase;
+};
+```
+
+### 2.2. Supabase Real-time Dashboard Settings (Mandatory)
+
+Before subscribing, the following steps must be taken for the `notifications` table in the **Supabase Dashboard**:
+
+1.  **Enable Realtime**: Turn on Real-time broadcast for the `notifications` table.
+2.  **Enable RLS (Row Level Security) and Create a Policy**:
+      - **RLS is crucial** to ensure users only listen to their own data.
+      - To quickly see it working, **enable RLS** and use a temporary read policy that grants access to all users.
+      - **🚨 WARNING (CRITICAL for Production):** This temporary policy should **NEVER** be used in production. In a live application, the following restricted RLS policy is **mandatory** to ensure only the authenticated user can read their own notifications:
+      - This prevents another user's data from being listened to without proper authentication.
+
+```sql
+create policy "Enable users to view their own data only"
+on "public"."notifications"
+as PERMISSIVE
+for SELECT
+to authenticated
+using (
+    (select auth.uid()) = user_id
+);
+```
+
+### 2.3. Supabase Table Subscription Function
+
+Using the created Supabase client, we need to subscribe to the notification table specific to a certain user.
+
+```typescript
+// /data/subscribe-notifications.ts
+"use client";
+
+import { getSupabaseClient } from "@/lib/supabase";
+
+export const subscribeToNotifications = (
+  userId: string,
+  onUpdate: () => void // Callback to run when a change occurs
+): (() => void) => {
+  console.log("Subscribing to notifications for user:", userId);
+  let channel: any = null;
+  let supabaseInstance: ReturnType<typeof getSupabaseClient> | null = null;
+
+  try {
+    supabaseInstance = getSupabaseClient(); // Subscribe to notification changes for this user.
+
+    channel = supabaseInstance
+      .channel(`notifications-${userId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*", // Listen to all events (INSERT, UPDATE, DELETE)
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${userId}`, // Filter only by the relevant user's ID
+        },
+        (payload) => {
+          console.log("Real-time notification update:", payload);
+          onUpdate(); // Trigger the callback
+        }
+      )
+      .subscribe(); // Cleanup function (Unsubscribe)
+
+    return () => {
+      if (channel && supabaseInstance) {
+        supabaseInstance.removeChannel(channel);
+      }
+    };
+  } catch (error) {
+    console.warn(
+      "Supabase not configured, real-time notifications disabled:",
+      error
+    );
+    return () => {}; // No-op cleanup
+  }
+};
+```
+
+-----
+
+## 3\. Frontend Integration: The NotificationBell Component
+
+Finally, we create the `NotificationBell` component, which listens to the real-time subscription, displays notifications, and manages interactions.
+
+```tsx
+// NotificationBell.tsx (Key Sections)
+
+import { useEffect, useState, useCallback } from "react";
+// ... (Other UI and Action imports)
+import { subscribeToNotifications } from "@/data/subscribe-notifications"; // 👈 Our Supabase subscription function
+
+export function NotificationBell() {
+  // 1. State Definitions
+  const { data: session } = useSession();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0); // 2. Function to Fetch Initial Notifications
+
+  const fetchNotifications = useCallback(async () => {
+    // Fetches the user's notifications and count from the database via HTTP
+    // ...
+  }, [session?.user?.id]); // 3. Real-time Subscription (Where All the Magic Happens!) 🧙‍♂️
+
+  useEffect(() => {
+    if (!session?.user?.id) return; // 3a. Fetch initial data, so the screen isn't empty.
+    fetchNotifications(); // 3b. Subscribe to Supabase and listen for changes. // When Supabase sends a change signal, re-fetch the list instantly.
+
+    const unsubscribe = subscribeToNotifications(session.user.id, () => {
+      fetchNotifications(); // 👈 Signal received, refresh the list immediately!
+    }); // 3c. Cleanup (Unsubscribe when exiting the component)
+    return () => {
+      unsubscribe();
+    };
+  }, [session?.user?.id, fetchNotifications]); // Runs when the user changes or the re-fetch function is updated. // ... 4. Handlers and UI Render Sections (Abbreviated)
+
+  if (!session?.user) {
+    return null;
+  }
+
+  return (
+    // Simple bell icon and unread notification count (Badge) display
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="relative">
+          <Bell className="h-5 w-5" />
+          {unreadCount >
+            0 /* Badge display */ && <span>{unreadCount}</span>}
+        </Button>
+      </DropdownMenuTrigger>
+            {/* Dropdown content where notifications are mapped. */}
+    </DropdownMenu>
+  );
+}
+```
+
+-----
+
+## 🚪 Conclusion
+
+We've successfully set up the real-time notification stream in Next.js. However, remember: **Security is always a priority.** Be sure to correctly configure Supabase RLS policies in your production environment. Filtering by **`user_id` is vital** for the data integrity of your application.
+
+-----
+
+Would you like me to make any further stylistic or technical adjustments to this English version?

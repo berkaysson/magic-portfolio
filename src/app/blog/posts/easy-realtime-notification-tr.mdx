@@ -1,0 +1,265 @@
+---
+title: "Sıfırdan Kolay Real-Time Bildirim Sistemi Kurulumu (Next.js + Supabase)"
+summary: "Üç basit adımda (Model, Backend Tetikleme, Real-time Abonelik) Next.js uygulamanıza nasıl ultra hızlı ve basit gerçek zamanlı bildirimler ekleyebileceğinizi göstereceğim."
+publishedAt: "2025-11-18"
+tag: "#Next #Supabase #Prisma"
+---
+
+Kalıcı ve anlık bildirim sistemi kurmak gözünüzde büyümesin. Bu yazıda, üç basit adımda (Model, Backend Tetikleme, Real-time Abonelik) Next.js uygulamanıza nasıl ultra hızlı ve basit gerçek zamanlı bildirimler ekleyebileceğinizi göstereceğim. Prisma ve Supabase Realtime ile bu iş düşündüğünüzden çok daha kolay ve yönetilebilir.
+
+## 1\. Veritabanı Modeli ve Backend Tetikleyicileri
+
+### 1.1. Prisma Bildirim Modeli
+
+Öncelikle, oluşacak bildirimleri depolamak için bir tablo yaratmamız lazım. Ben **Prisma ORM** kullanıyorum ve `notifications` tablosuna karşılık gelen aşağıdaki modeli oluşturdum. Uygulamamda bildirimler her bir randevu (`appointment`) oluştuğunda veya düzenlendiğinde tetikleniyor.
+
+```typescript
+enum NotificationType {
+  APPOINTMENT_CREATED
+  APPOINTMENT_CANCELLED
+  APPOINTMENT_CONFIRMED
+  APPOINTMENT_UPDATED
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String           @map("user_id")
+  type      NotificationType
+  title     String
+  message   String           @db.Text
+  read      Boolean          @default(false)
+  
+  appointmentId    String?  @map("appointment_id") // Randevu silinirse null olabilir
+  organizationId   String   @map("organization_id")
+  
+  metadata  Json? // Ek veriler için
+  
+  createdAt DateTime         @default(now()) @map("created_at")
+  readAt    DateTime?        @map("read_at")
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read, createdAt]) // Kullanıcının okunmamış bildirimlerini getirmek için kritik
+  @@map("notifications")
+}
+```
+
+### 1.2. Backend Bildirim Oluşturma İşlemi
+
+Veritabanı migration yapıldıktan sonra, her gerekli yere bildirim oluşturma işlemi yapıyoruz. Aşağıdaki örnekte bir randevu iptal edildikten sonra oluşan duyuru gösterilmiştir:
+
+```typescript
+// Randevu durumu CANCELLED olarak güncellenir.
+await db.appointment.update({
+  where: { id: appointmentId },
+  data: {
+    status: AppointmentStatus.CANCELLED,
+    cancellationReason: cancellationReason || null,
+  },
+});
+
+// Organizasyon sahibi ve üyelerine bildirim gönderilir.
+const userName = appointment.user.name || appointment.user.email || "A user";
+const formattedStartTime = appointment.startTime.toLocaleString();
+const notificationTitle = "Appointment Cancelled";
+const notificationMessage = `${userName} has cancelled the appointment "${
+  appointment.title
+}" scheduled for ${formattedStartTime} in ${appointment.organization.name}.${
+  cancellationReason ? ` Reason: ${cancellationReason}` : ""
+}`;
+
+await createOrganizationNotifications(
+  appointment.organizationId,
+  appointment.id,
+  NotificationType.APPOINTMENT_CANCELLED,
+  notificationTitle,
+  notificationMessage
+);
+```
+
+Bu işlemden sonra `notifications` tablosunda yeni bir kayıt oluşur. Artık real-time (gerçek zamanlı) kısma başlayabiliriz.
+
+---
+
+## 2\. Supabase İstemcisi Kurulumu ve Abonelik
+
+### 2.1. Supabase Client Oluşturma (Singleton Pattern)
+
+Supabase SDK yüklemek ve bir client oluşturmak lazım. Burada **Singleton Pattern** kullanarak client'ın yalnızca bir kez oluşturulmasını sağlıyoruz. Supabase URL ve anon key, çevre değişkenlerinden alınabilir.
+
+```typescript
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
+
+// Client örneğini tutacak modül seviyesinde değişken
+let supabase: SupabaseClient | null = null;
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+/**
+ * Creates a Supabase client for client-side use.
+ */
+export const createSupabaseClient = () => {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error(
+      "Missing Supabase environment variables: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are required"
+    );
+  }
+
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    realtime: {
+      params: {
+        eventsPerSecond: 10, // Real-time olaylar için limit
+      },
+    },
+  });
+};
+
+/**
+ * Get a Supabase client instance (Singleton).
+ * Bu, client'ı *sadece* ilk çağrıda oluşturur ve yeniden kullanır.
+ */
+export const getSupabaseClient = () => {
+  if (!supabase) {
+    supabase = createSupabaseClient();
+  }
+  return supabase;
+};
+```
+
+### 2.2. Supabase Real-time Dashboard Ayarları (Zorunlu)
+
+Abonelikten önce **Supabase Dashboard**'da `notifications` tablosu için şu işlemler yapılmalıdır:
+
+1.  **Realtime'ı Etkinleştirin**: `notifications` tablosu için Real-time yayınını açın.
+2.  **RLS (Row Level Security) Etkinleştirme ve Politika Oluşturma**:
+
+    - RLS, kullanıcıların yalnızca kendi verilerini dinlemesini sağlamak için önemlidir.
+    - Şimdilik hızlıca görmek için, **RLS'yi etkinleştirin** ve **geçici olarak tüm kullanıcılara erişim izni** veren bir okuma politikası kullanın.
+    - **🚨 UYARI (Ürün Ortamı İçin KRİTİK):** Bu geçici politika **ASLA** canlıda (production) kullanılmamalıdır. Canlı uygulamada, yalnızca oturum açmış kullanıcının kendi bildirimlerini okumasını sağlamak için şu kısıtlı RLS politikası **zorunludur**:
+    - Bu, yetkilendirme (Auth) olmadan başka bir kullanıcının verilerinin dinlenmesini engeller.
+
+    ```sql
+    create policy "Enable users to view their own data only"
+    on "public"."notifications"
+    as PERMISSIVE
+    for SELECT
+    to authenticated
+    using (
+        (select auth.uid()) = user_id
+    );
+    ```
+
+### 2.3. Supabase Tablosuna Abone Olma Fonksiyonu
+
+Oluşturulan Supabase client'ı kullanarak belirli bir kullanıcıya ait bildirim tablosuna abone olmamız lazım.
+
+```typescript
+// /data/subscribe-notifications.ts
+"use client";
+
+import { getSupabaseClient } from "@/lib/supabase";
+
+export const subscribeToNotifications = (
+  userId: string,
+  onUpdate: () => void // Değişiklik olduğunda çalışacak callback
+): (() => void) => {
+  console.log("Subscribing to notifications for user:", userId);
+  let channel: any = null;
+  let supabaseInstance: ReturnType<typeof getSupabaseClient> | null = null;
+
+  try {
+    supabaseInstance = getSupabaseClient(); // Bu kullanıcıya ait bildirim değişikliklerine abone olunur.
+
+    channel = supabaseInstance
+      .channel(`notifications-${userId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*", // Tüm olayları (INSERT, UPDATE, DELETE) dinle
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${userId}`, // Yalnızca ilgili kullanıcının ID'sine göre filtrele
+        },
+        (payload) => {
+          console.log("Real-time notification update:", payload);
+          onUpdate(); // Callback'i tetikle
+        }
+      )
+      .subscribe(); // Temizlik fonksiyonu (Unsubscribe)
+
+    return () => {
+      if (channel && supabaseInstance) {
+        supabaseInstance.removeChannel(channel);
+      }
+    };
+  } catch (error) {
+    console.warn(
+      "Supabase not configured, real-time notifications disabled:",
+      error
+    );
+    return () => {}; // No-op cleanup
+  }
+};
+```
+
+---
+
+## 3\. Frontend Entegrasyonu: NotificationBell Bileşeni
+
+Son olarak, real-time aboneliği dinleyen, bildirimleri gösteren ve etkileşimleri yöneten `NotificationBell` bileşenini oluşturuyoruz.
+
+```typescript
+// NotificationBell.tsx (Önemli Kısımlar)
+
+import { useEffect, useState, useCallback } from "react";
+// ... (Diğer UI ve Action importları)
+import { subscribeToNotifications } from "@/data/subscribe-notifications"; // 👈 Supabase abonelik fonksiyonumuz
+
+export function NotificationBell() {
+  // 1. State Tanımlamaları
+  const { data: session } = useSession();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0); // 2. Başlangıç Bildirimlerini Çekme Fonksiyonu
+
+  const fetchNotifications = useCallback(async () => {
+    // Kullanıcının HTTP ile veritabanından bildirimlerini ve sayısını çeker
+    // ...
+  }, [session?.user?.id]); // 3. Real-time Abonelik (İşin Tüm Büyüsü Burada!) 🧙‍♂️
+
+  useEffect(() => {
+    if (!session?.user?.id) return; // 3a. İlk veriyi çek, böylece ekran boş kalmaz.
+    fetchNotifications(); // 3b. Supabase'e abone ol ve değişiklikleri dinle. // Supabase bir değişiklik sinyali gönderdiğinde, listeyi yeniden çek.
+
+    const unsubscribe = subscribeToNotifications(session.user.id, () => {
+      fetchNotifications(); // 👈 Sinyal geldi, listeyi anında yenile!
+    }); // 3c. Temizlik (Çıkarken aboneliği sonlandır)
+    return () => {
+      unsubscribe();
+    };
+  }, [session?.user?.id, fetchNotifications]); // Kullanıcı değiştiğinde veya yeniden çekme fonksiyonu güncellendiğinde çalışır. // ... 4. Handler'lar ve UI Render Kısımları (Kısaltıldı)
+
+  if (!session?.user) {
+    return null;
+  }
+
+  return (
+    // Basit bir zil simgesi ve okunmamış bildirim sayısı (Badge) gösterimi
+    <DropdownMenu>
+           {" "}
+      <DropdownMenuTrigger asChild>
+               {" "}
+        <Button variant="ghost" size="icon" className="relative">
+                    <Bell className="h-5 w-5" />          {unreadCount >
+            0 /* Rozet gösterimi */ && <span>{unreadCount}</span>}       {" "}
+        </Button>
+             {" "}
+      </DropdownMenuTrigger>
+            {/* Dropdown içeriğinde bildirimler map edilir. */}   {" "}
+    </DropdownMenu>
+  );
+}
+```
+
+Next.js'te gerçek zamanlı bildirim akışını başarıyla kurduk. Ancak unutmayın: Güvenlik her zaman önceliklidir. Supabase RLS politikalarını canlı (production) ortamda doğru bir şekilde ayarladığınızdan emin olun. user_id üzerinden filtreleme yapmak, uygulamanızın veri bütünlüğü için hayati önem taşır.
