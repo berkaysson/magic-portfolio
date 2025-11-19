@@ -16,22 +16,6 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-
-  // 🔑 CSP
-  async headers() {
-    return [
-      {
-        source: "/:path*",
-        headers: [
-          {
-            key: "Content-Security-Policy",
-            value:
-              "default-src 'self'; script-src 'self' 'unsafe-eval' https://www.clarity.ms; connect-src 'self' https://www.clarity.ms https://o.clarity.ms; style-src 'self' https://www.clarity.ms;",
-          },
-        ],
-      },
-    ];
-  },
 };
 
 export default withMDX(nextConfig);
