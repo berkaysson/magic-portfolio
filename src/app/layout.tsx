@@ -15,6 +15,7 @@ import {
 } from "@/once-ui/components";
 import { opacity, SpacingToken } from "@/once-ui/types";
 import { Meta } from "@/once-ui/modules";
+import Script from "next/script";
 
 export async function generateMetadata() {
   return Meta.generate({
@@ -73,7 +74,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
             `,
           }}
         />
-
+        {/* 
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -84,8 +85,22 @@ export default async function RootLayout({ children }: RootLayoutProps) {
               })(window, document, "clarity", "script", "u81m3xte0y");
             `,
           }}
-        />
+        /> */}
       </head>
+
+      <Script
+        id="ms-clarity" // Unique ID
+        strategy="afterInteractive" // Veya "beforeInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `
+      (function(c,l,a,r,i,t,y){
+          c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+          t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+          y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+      })(window, document, "clarity", "script", "u81m3xte0y");
+    `,
+        }}
+      />
 
       <ThemeProvider>
         <ToastProvider>
