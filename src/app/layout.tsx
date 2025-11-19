@@ -88,9 +88,9 @@ export default async function RootLayout({ children }: RootLayoutProps) {
         /> */}
       </head>
 
-      <Script
-        id="ms-clarity" // Unique ID
-        strategy="afterInteractive" // Veya "beforeInteractive"
+      {/* <Script
+        id="clarity-script" // Unique ID
+        strategy="afterInteractive"
         dangerouslySetInnerHTML={{
           __html: `
       (function(c,l,a,r,i,t,y){
@@ -100,7 +100,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
       })(window, document, "clarity", "script", "u81m3xte0y");
     `,
         }}
-      />
+      /> */}
 
       <ThemeProvider>
         <ToastProvider>
@@ -111,6 +111,16 @@ export default async function RootLayout({ children }: RootLayoutProps) {
             margin="0"
             padding="0"
           >
+            <Script id="clarity-script" strategy="afterInteractive">
+              {`
+            (function(c,l,a,r,i,t,y){
+                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+            })(window, document, "clarity", "script", "u81m3xte0y");
+          `}
+            </Script>
+
             <Background
               position="fixed"
               mask={{
