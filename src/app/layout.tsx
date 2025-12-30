@@ -74,6 +74,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
             `,
           }}
         />
+        <script defer src="https://cloud.umami.is/script.js" data-website-id="f7b9ffa2-0e2f-48fd-a3b0-05c35f1ea9ea"></script>
         {/* 
         <script
           dangerouslySetInnerHTML={{
