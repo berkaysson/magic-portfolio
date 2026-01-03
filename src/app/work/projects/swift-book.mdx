@@ -1,0 +1,105 @@
+---
+title: "SwiftBook — Enterprise Multi-Tenant Scheduling Platform"
+publishedAt: "2025-12-21"
+summary: "A SaaS solution for appointment management featuring multi-tenancy, complex availability scheduling, and real-time notifications built with Next.js, Prisma, and Supabase."
+images:
+  - "/images/projects/swift-book/dashboard-overview.png"
+  - "/images/projects/swift-book/calendar-view.png"
+  - "/images/projects/swift-book/organization-settings.png"
+  - "/images/projects/swift-book/public-view.png"
+team:
+  - name: "Berkay Sonel"
+    role: "Full Stack Engineer"
+    avatar: "/images/avatar-alt.png"
+    linkedIn: "https://www.linkedin.com/in/berkaysonel/"
+link: "https://swift-book.netlify.app/"
+github: "https://github.com/berkaysson/multi-tenant-scheduler"
+---
+
+## Overview
+
+SwiftBook is a robust, multi-tenant scheduling application designed to streamline appointment booking for organizations ranging from medical clinics to consultancy firms. It addresses the inefficiencies of traditional manual scheduling, such as communication breakdowns and double-booking errors[cite: 147, 148]. Unlike simple booking tools, SwiftBook is architected as a platform where users can manage multiple organizations, define complex availability logic, and handle staff roles securely.
+
+Built on **Next.js 14 (App Router)**, it leverages a modern stack including **PostgreSQL**, **Prisma**, and **NextAuth.js v5** to ensure performance and security[cite: 180].
+
+## Architecture & Data Design
+
+The core strength of SwiftBook lies in its **Data Access Layer** separation. The application strictly separates database interactions (`src/data`) from server actions (`src/actions`), ensuring modularity and testability.
+
+### Database Schema (Prisma)
+
+The relational schema is designed for scalability:
+
+- **Multi-Tenancy**: The `Organization` model acts as the tenant root, linked to users via `OrganizationMember` with defined roles[cite: 221, 223].
+- **Availability Logic**: Complex scheduling is handled via `WeeklyAvailability` (recurring hours) and `UnavailableDate` (specific closures/holidays) models[cite: 246, 247].
+- **Appointments**: The `Appointment` entity links Users to Organizations and specific `AppointmentType` definitions (services with distinct colors and durations)[cite: 245].
+
+### Authentication & Security
+
+Security is handled via **NextAuth.js v5** with a robust configuration:
+
+- **Hybrid Auth**: Supports both **Google OAuth** and **Credentials** (Email/Password)[cite: 251].
+- **Token Management**: Custom logic for `VerificationToken` and `PasswordResetToken` ensures secure account recovery flows via Resend email integration[cite: 252].
+- **Middleware Protection**: `src/middleware.ts` enforces route protection across public, auth, and protected paths, handling role-based redirects efficiently[cite: 256].
+
+## Key Features
+
+### 🏢 Multi-Tenant Organization Management
+
+Users can create and manage multiple distinct organizations. The `OrganizationCard` component provides quick access to status, visibility settings, and analytics[cite: 328, 329].
+
+- **Dynamic Routing**: Public profiles are accessible via unique slugs (`/o/[slug]`), functioning as standalone landing pages for businesses[cite: 433, 434].
+- **Map Integration**: Organizations include geolocation data, visualized via `OrganizationMapDialogs` to help users find services nearby[cite: 38].
+
+### 📅 Advanced Scheduling Engine
+
+The scheduling engine goes beyond simple time slots:
+
+- **Custom Services**: Managers define `AppointmentType`s with specific durations and visual identifiers[cite: 253].
+- **Availability Rules**: The `createWeeklyAvailability` action handles recurring schedules, while `createUnavailableDate` manages ad-hoc closures[cite: 192].
+- **Conflict Resolution**: Server-side logic ensures no double-booking occurs during the creation process (`create-appointment.ts`)[cite: 33].
+
+### 🔔 Real-Time Notification System
+
+Users are kept in the loop via a responsive notification system[cite: 262]:
+
+- **Live Updates**: The `NotificationBell` component uses Supabase real-time subscriptions (`subscribe-notifications.ts`) to update the UI instantly without page reloads[cite: 263].
+- **Action Triggers**: Server actions automatically trigger notifications for events like creation (`APPOINTMENT_CREATED`) or cancellation (`APPOINTMENT_CANCELLED`)[cite: 260].
+
+## User Experience & Interface Design
+
+A critical focus of SwiftBook was to provide a "mobile-first" experience that works seamlessly across devices[cite: 304].
+
+- **Responsive Navigation**: The `ProtectedNavigation` component dynamically adapts its layout, offering a sidebar on desktop and a collapsible menu on mobile devices (320px support)[cite: 303, 304].
+- **Interactive Dialogs**: Complex data entry, such as booking an appointment or editing organization hours, is handled within modal dialogs like `CreateAppointmentDialog` and `OrganizationHoursDialog`. This keeps users in context without unnecessary page navigation[cite: 297].
+- **Feedback Loops**: The application uses extensive toast notifications and form validation messages (via Zod) to provide immediate feedback during login, registration, and booking flows[cite: 316].
+- **Public Landing Pages**: Each organization gets a dedicated, public-facing landing page designed to convert visitors into clients. These pages feature the organization's logo, contact info, and an intuitive "Book Appointment" CTA[cite: 435].
+
+## Technical Implementation
+
+### Server Actions
+
+SwiftBook utilizes Next.js Server Actions for all data mutations, ensuring type safety and reduced client-side JavaScript[cite: 233]:
+
+- **Appointment Lifecycle**: Actions like `createAppointment` and `updateAppointmentStatus` handle the full state machine of a booking[cite: 235].
+- **Role-Based Execution**: Actions such as `updateOrganization` include strict ownership checks (`checkOrganizationOwnership`) to prevent unauthorized modifications[cite: 257].
+
+### Component Library
+
+The UI is constructed using **ShadCN UI** and **Tailwind CSS**, organized by feature context[cite: 301]:
+
+- **Atomic Design**: Components are split into logical directories: `auth`, `navigation`, `appointments`, and `organizations`.
+- **Reusable Forms**: Form logic is encapsulated in components like `LoginForm` and `RegisterForm`, utilizing `react-hook-form` for efficient state management[cite: 313].
+
+## Future Roadmap & Scalability
+
+While the current MVP delivers a robust scheduling experience[cite: 35], the project architecture supports significant future expansions:
+
+- **SaaS Monetization**: Integration of payment gateways (e.g., Stripe, Iyzico) to allow organizations to accept payments during booking[cite: 492].
+- **Native Mobile Apps**: Leveraging the existing API and logic to build React Native or Flutter applications for a native mobile experience[cite: 495].
+- **Calendar Synchronization**: Future updates aim to sync SwiftBook appointments with external providers like Google Calendar and Outlook[cite: 496].
+- **Advanced Analytics**: Plans to introduce detailed dashboards for organization owners to track cancellation rates, peak booking hours, and staff performance[cite: 493].
+
+## Summary
+
+SwiftBook represents a complete SaaS boilerplate for scheduling needs. By solving complex problems like time zone management, role-based access control, and real-time state synchronization, it provides a solid foundation for any booking-intensive business requirement.

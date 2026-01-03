@@ -259,6 +259,26 @@ const gallery = {
       alt: "Berkay Sonel's portfoliogithub contributions",
       orientation: "horizontal",
     },
+    {
+      src: "/images/gallery/swiftbook-calendar-view.png",
+      alt: "SwiftBook calendar view",
+      orientation: "vertical",
+    },
+    {
+      src: "/images/gallery/swiftbook-dashboard-overview.png",
+      alt: "SwiftBook dashboard overview",
+      orientation: "horizontal",
+    },
+    {
+      src: "/images/gallery/swiftbook-organization-settings.png",
+      alt: "SwiftBook organization settings",
+      orientation: "horizontal",
+    },
+    {
+      src: "/images/gallery/swiftbook-public-view.png",
+      alt: "SwiftBook public view",
+      orientation: "horizontal",
+    },
   ],
 };
 

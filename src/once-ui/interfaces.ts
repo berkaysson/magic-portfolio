@@ -169,7 +169,7 @@ export interface DisplayProps extends HTMLAttributes<HTMLDivElement> {
     | "macro-medium"
     | "macro-long";
   opacity?: opacity;
-  zIndex?: -1 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+  zIndex?: -1 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 9999;
   dark?: boolean;
   light?: boolean;
 }

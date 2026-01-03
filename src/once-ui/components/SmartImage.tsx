@@ -1,9 +1,10 @@
 "use client";
 
 import React, { CSSProperties, useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom"; // Portal eklendi
 import Image from "next/image";
 
-import { Flex, Skeleton } from ".";
+import { Flex, IconButton, Skeleton } from ".";
 
 export interface SmartImageProps extends React.ComponentProps<typeof Flex> {
   aspectRatio?: string;
@@ -32,7 +33,13 @@ const SmartImage: React.FC<SmartImageProps> = ({
   ...rest
 }) => {
   const [isEnlarged, setIsEnlarged] = useState(false);
+  const [mounted, setMounted] = useState(false); // Portal için mount kontrolü
   const imageRef = useRef<HTMLDivElement>(null);
+
+  // Hydration hatasını önlemek için mount kontrolü
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleClick = () => {
     if (enlarge) {
@@ -53,27 +60,22 @@ const SmartImage: React.FC<SmartImageProps> = ({
       }
     };
 
-    document.addEventListener("keydown", handleEscape);
-    window.addEventListener("wheel", handleWheel, { passive: true });
-
-    return () => {
-      document.removeEventListener("keydown", handleEscape);
-      window.removeEventListener("wheel", handleWheel);
-    };
-  }, [isEnlarged]);
-
-  useEffect(() => {
     if (isEnlarged) {
+      document.addEventListener("keydown", handleEscape);
+      window.addEventListener("wheel", handleWheel, { passive: true });
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "auto";
     }
 
     return () => {
+      document.removeEventListener("keydown", handleEscape);
+      window.removeEventListener("wheel", handleWheel);
       document.body.style.overflow = "auto";
     };
   }, [isEnlarged]);
 
+  // Thumbnail animasyonu (Bulanıklaşsa da sorun değil, çünkü Portal üstünü örtecek)
   const calculateTransform = () => {
     if (!imageRef.current) return {};
 
@@ -89,8 +91,9 @@ const SmartImage: React.FC<SmartImageProps> = ({
       transform: isEnlarged
         ? `translate(${translateX}px, ${translateY}px) scale(${scale})`
         : "translate(0, 0) scale(1)",
-      transition: "all 0.2s ease-in-out",
-      zIndex: isEnlarged ? 10 : undefined,
+      transition: "all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)", // Animasyon süresi
+      zIndex: isEnlarged ? 1 : 0, // Düşük Z-index, Portal en üste gelecek
+      opacity: isEnlarged ? 0 : 1, // Büyüyünce alttaki bulanık olanı gizle
     };
   };
 
@@ -102,7 +105,7 @@ const SmartImage: React.FC<SmartImageProps> = ({
 
   const getYouTubeEmbedUrl = (url: string) => {
     const match = url.match(
-      /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
+      /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
     );
     return match
       ? `https://www.youtube.com/embed/${match[1]}?controls=0&rel=0&modestbranding=1`
@@ -112,8 +115,70 @@ const SmartImage: React.FC<SmartImageProps> = ({
   const isVideo = src?.endsWith(".mp4");
   const isYouTube = isYouTubeVideo(src);
 
+  // Portal İçeriği: Sayfanın en tepesine render edilen yüksek çözünürlüklü katman
+  const overlayContent = (
+    <Flex
+      horizontal="center"
+      vertical="center"
+      position="fixed"
+      background="overlay"
+      onClick={handleClick}
+      top="0"
+      left="0"
+      zIndex={9999} // Grid'den bağımsız en üst katman
+      opacity={isEnlarged ? 100 : 0}
+      cursor="interactive"
+      transition="macro-medium"
+      style={{
+        backdropFilter: "blur(10px)", // Arka planı hafif flu yap
+        width: "100vw",
+        height: "100vh",
+        pointerEvents: isEnlarged ? "all" : "none",
+        visibility: isEnlarged ? "visible" : "hidden",
+      }}
+    >
+      <Flex
+        style={{
+          width: "90vw",
+          height: "90vh",
+          position: "relative",
+        }}
+        onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
+      >
+        {isVideo ? (
+          <video
+            src={src}
+            autoPlay
+            loop
+            muted
+            playsInline
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "contain",
+            }}
+          />
+        ) : (
+          <Image
+            src={src}
+            alt={alt}
+            fill
+            sizes="100vw"
+            quality={100} // Maksimum kalite
+            priority={true} // Hemen yükle
+            unoptimized={true} // Next.js sıkıştırmasını tamamen kapat (Test için)
+            style={{
+              objectFit: "contain",
+            }}
+          />
+        )}
+      </Flex>
+    </Flex>
+  );
+
   return (
     <>
+      {/* Sayfa içindeki normal Thumbnail */}
       <Flex
         ref={imageRef}
         fillWidth
@@ -174,61 +239,8 @@ const SmartImage: React.FC<SmartImageProps> = ({
         )}
       </Flex>
 
-      {isEnlarged && enlarge && (
-        <Flex
-          horizontal="center"
-          vertical="center"
-          position="fixed"
-          background="overlay"
-          pointerEvents="none"
-          onClick={handleClick}
-          top="0"
-          left="0"
-          zIndex={isEnlarged ? 9 : undefined}
-          opacity={isEnlarged ? 100 : 0}
-          cursor="interactive"
-          transition="macro-medium"
-          style={{
-            backdropFilter: isEnlarged ? "var(--backdrop-filter)" : "0px",
-            width: "100vw",
-            height: "100vh",
-          }}
-        >
-          <Flex
-            style={{
-              height: "100vh",
-              transform: "translate(-50%, -50%)",
-            }}
-            onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
-          >
-            {isVideo ? (
-              <video
-                src={src}
-                autoPlay
-                loop
-                muted
-                playsInline
-                style={{
-                  width: "90vw",
-                  height: "auto",
-                  objectFit: "contain",
-                }}
-              />
-            ) : (
-              <Image
-                src={src}
-                alt={alt}
-                fill
-                sizes="90vw"
-                unoptimized={unoptimized}
-                style={{
-                  objectFit: "contain",
-                }}
-              />
-            )}
-          </Flex>
-        </Flex>
-      )}
+      {/* Portal ile body'ye taşınan Yüksek Kaliteli Overlay */}
+      {mounted && enlarge && createPortal(overlayContent, document.body)}
     </>
   );
 };
