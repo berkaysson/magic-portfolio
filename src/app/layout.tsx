@@ -74,34 +74,13 @@ export default async function RootLayout({ children }: RootLayoutProps) {
             `,
           }}
         />
-        <script defer src="https://cloud.umami.is/script.js" data-website-id="f7b9ffa2-0e2f-48fd-a3b0-05c35f1ea9ea"></script>
-        {/* 
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function(c,l,a,r,i,t,y){
-                  c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-                  t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-                  y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-              })(window, document, "clarity", "script", "u81m3xte0y");
-            `,
-          }}
-        /> */}
+        <Script
+          defer
+          src="https://cloud.umami.is/script.js"
+          data-website-id="f7b9ffa2-0e2f-48fd-a3b0-05c35f1ea9ea"
+          strategy="afterInteractive"
+        />
       </head>
-
-      {/* <Script
-        id="clarity-script" // Unique ID
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{
-          __html: `
-      (function(c,l,a,r,i,t,y){
-          c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-          t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-          y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-      })(window, document, "clarity", "script", "u81m3xte0y");
-    `,
-        }}
-      /> */}
 
       <ThemeProvider>
         <ToastProvider>
