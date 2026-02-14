@@ -6,7 +6,7 @@ const person = {
   get name() {
     return `${this.firstName} ${this.lastName}`;
   },
-  role: "Full Stack Developer",
+  role: "Full Stack Developer, M.Sc. in Computer Engineering",
   avatar: "/images/avatar-alt.png",
   email: "berkaysonel85@gmail.com",
   location: "Europe/Istanbul", // Expecting the IANA time zone identifier, e.g., 'Europe/Vienna'
@@ -82,7 +82,7 @@ const about = {
     display: true,
     title: "Introduction",
     description:
-      "Berkay is a results-driven Frontend Developer with 2+ years of experience building high-performance, responsive web applications. He is proficient in leading development initiatives, optimizing performance (code splitting, caching), and integrating complex systems using React, Next.js, and ASP.NET.", // Team Leader concept softened to "leading development initiatives"
+      "Berkay is a results-driven Frontend Developer with an M.Sc. in Computer Engineering and 2+ years of experience building high-performance, responsive web applications. He is proficient in leading development initiatives, optimizing performance (code splitting, caching), and integrating complex systems using React, Next.js, and ASP.NET.", // Team Leader concept softened to "leading development initiatives"
   },
   work: {
     display: true,
@@ -129,8 +129,7 @@ const about = {
     institutions: [
       {
         name: "Selçuk University",
-        description:
-          "Master’s in Computer Engineering (Ongoing - 2026) – GPA: 3.82",
+        description: "M.Sc. in Computer Engineering (2026) – Graduated with 96/100 High Honor",
       },
       {
         name: "Çankaya University",
