@@ -3,13 +3,16 @@ import {
   Button,
   Column,
   Flex,
+  Heading,
   IconButton,
   RevealFx,
+  Text,
 } from "@/once-ui/components";
 import { baseURL } from "@/app/resources";
 import { about, person, social, work } from "@/app/resources/content";
 import { Meta, Schema } from "@/once-ui/modules";
-import { Projects } from "@/components/work/Projects";
+import { ProjectsView } from "@/components/work/ProjectsView";
+import { getPosts } from "@/app/utils/utils";
 
 export async function generateMetadata() {
   return Meta.generate({
@@ -22,6 +25,13 @@ export async function generateMetadata() {
 }
 
 export default function Work() {
+  const allProjects = getPosts(["src", "app", "work", "projects"]);
+  const sortedProjects = allProjects.sort(
+    (a, b) =>
+      new Date(b.metadata.publishedAt).getTime() -
+      new Date(a.metadata.publishedAt).getTime(),
+  );
+
   return (
     <Column maxWidth="m">
       <Schema
@@ -37,7 +47,28 @@ export default function Work() {
           image: `${baseURL}${person.avatar}`,
         }}
       />
-      <Projects />
+
+      {/* Header Section */}
+      <Column paddingX="l" paddingTop="12" paddingBottom="24" gap="4">
+        <RevealFx>
+          <Heading as="h1" variant="display-strong-s">
+            Personal Projects
+          </Heading>
+        </RevealFx>
+        <RevealFx delay={0.1}>
+          <Text
+            variant="body-default-m"
+            onBackground="neutral-weak"
+            style={{ maxWidth: "640px" }}
+          >
+            A collection of side projects and experiments I've built in my free
+            time. These are my personal playgrounds — tools, apps, and ideas I
+            craft to explore new technologies and scratch my own itch.
+          </Text>
+        </RevealFx>
+      </Column>
+
+      <ProjectsView projects={sortedProjects} />
 
       <RevealFx paddingTop="12" delay={0.1} horizontal="start" paddingLeft="12">
         <Button
