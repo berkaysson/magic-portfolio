@@ -129,7 +129,8 @@ const about = {
     institutions: [
       {
         name: "Selçuk University",
-        description: "M.Sc. in Computer Engineering (2026) – Graduated with 96/100 High Honor",
+        description:
+          "M.Sc. in Computer Engineering (2026) – Graduated with 96/100 High Honor",
       },
       {
         name: "Çankaya University",
@@ -208,6 +209,26 @@ const gallery = {
   title: `Photo gallery – ${person.name}`,
   description: `A photo collection of my products by ${person.name}`,
   images: [
+    {
+      src: "/images/projects/restora/restora-1.png",
+      alt: "Restora - 1",
+      orientation: "horizontal",
+    },
+    {
+      src: "/images/projects/restora/restora-2.png",
+      alt: "Restora - 2",
+      orientation: "horizontal",
+    },
+    {
+      src: "/images/projects/restora/restora-3.png",
+      alt: "Restora - 3",
+      orientation: "horizontal",
+    },
+    {
+      src: "/images/projects/restora/restora-4.png",
+      alt: "Restora - 4",
+      orientation: "horizontal",
+    },
     {
       src: "/images/gallery/habivita_launch.webp",
       alt: "Habivita launch dashboard",
