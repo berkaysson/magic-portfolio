@@ -1,0 +1,56 @@
+---
+title: "RPBP — PDF Reader & Text Extraction Tool"
+publishedAt: "2024-03-15"
+summary: "A specialized digital PDF reader designed for page-by-page text parsing and user progress tracking, currently serving a community of 300+ users."
+team:
+  - name: "Berkay Sonel"
+    role: "Full Stack Developer"
+    avatar: "/images/avatar-alt.png"
+    linkedIn: "https://www.linkedin.com/in/berkaysonel/"
+link: "https://berkaysson.github.io/read-pdf-by-page/"
+images:
+  - "/images/projects/rpbp/rpbp-1.png"
+  - "/images/projects/rpbp/rpbp-2.png"
+archived: true
+---
+
+## Overview
+
+RPBP (Read PDF By Page) was developed to streamline the reading and tracking of digital PDF documents. Unlike standard viewers, it extracts embedded text from native digital PDFs on a page-by-page basis and synchronizes the user's reading progress. It served as a foundational project for handling document state and visualization, which later evolved into the more complex, AI-driven Restora architecture.
+
+## Key Features
+
+- **Page-by-Page Visualization**: High-performance rendering engine utilizing `react-pdf` for smooth document navigation.
+- **Digital Text Parsing**: Extracts embedded text directly from native PDFs for page-level analysis without relying on heavy OCR engines.
+- **Progress Tracking & Bookmarking**: Persists the user's exact reading position and session data, allowing resumption of reading across sessions.
+- **Cloud Synchronization**: Integrated with **Firebase** for secure user authentication and real-time database updates to manage reading states.
+- **Validated User Base**: Actively used by **300+ registered users**, proving the reliability of the authentication and state management layers.
+- **Responsive Dark UI**: A modern, accessible interface built with Tailwind CSS and Radix UI.
+
+## Technologies Used
+
+- **Frontend**: React, TypeScript, React Router.
+- **Styling & UI**: Tailwind CSS, Radix UI, Lucide React.
+- **Core Libraries**: `react-pdf` for rendering, Firebase for Auth and Database.
+- **State Management**: React Context API.
+
+## Technical Challenges & Learnings
+
+- **State Synchronization**: Maintaining real-time alignment between the active PDF page and the user's Firebase profile required precise Context API management to avoid redundant network calls and race conditions.
+- **Document Parsing**: Extracting raw text from complex digital PDFs required careful handling of text layers to maintain reading order and formatting logic.
+
+## Outcome
+
+RPBP successfully scaled to support a live user base, providing hands-on experience in managing client-side state, Firebase integration, and React-based document rendering. The architectural lessons learned in building this document viewing ecosystem directly informed the frontend design of the more advanced Restora project.
+
+## Try It Now
+
+- [Live](https://berkaysson.github.io/read-pdf-by-page/)
+- [GitHub Repository](https://github.com/berkaysson/read-pdf-by-page)
+
+## Summary
+
+- Built a specialized PDF reader with native text parsing capabilities.
+- Engineered real-time progress tracking mechanisms using Firebase.
+- Scaled and maintained the application to support 300+ active users.
+- Validated foundational skills in document visualization and client-side state management.
