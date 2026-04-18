@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Column, Flex, IconButton } from "@/once-ui/components";
+import { Accordion, Column, Flex, IconButton } from "@/once-ui/components";
 import { ProjectCard } from "@/components";
 import { ProjectListItem } from "@/components/work/ProjectListItem";
 
@@ -16,6 +16,7 @@ interface ProjectData {
     team?: { avatar: string }[];
     featured?: boolean;
     link?: string;
+    archived?: boolean;
   };
 }
 
@@ -25,6 +26,12 @@ interface ProjectsViewProps {
 
 export function ProjectsView({ projects }: ProjectsViewProps) {
   const [viewMode, setViewMode] = useState<"compact" | "expanded">("compact");
+  const activeProjects = projects.filter(
+    (project) => !project.metadata.archived,
+  );
+  const archivedProjects = projects.filter(
+    (project) => project.metadata.archived,
+  );
 
   return (
     <>
@@ -55,11 +62,11 @@ export function ProjectsView({ projects }: ProjectsViewProps) {
       </Flex>
       <Column
         fillWidth
-        gap={viewMode === "compact" ? "2" : "xl"}
+        gap={viewMode === "compact" ? "8" : "xl"}
         marginBottom="40"
         paddingX="l"
       >
-        {projects.map((post, index) =>
+        {activeProjects.map((post, index) =>
           viewMode === "compact" ? (
             <ProjectListItem
               key={post.slug}
@@ -91,6 +98,27 @@ export function ProjectsView({ projects }: ProjectsViewProps) {
           ),
         )}
       </Column>
+
+      {archivedProjects.length > 0 && (
+        <Column fillWidth paddingX="l" marginBottom="40">
+          <Accordion title={`Archived Projects (${archivedProjects.length})`}>
+            <Column fillWidth gap="2">
+              {archivedProjects.map((post) => (
+                <ProjectListItem
+                  key={post.slug}
+                  href={`work/${post.slug}`}
+                  images={post.metadata.images}
+                  title={post.metadata.title}
+                  description={post.metadata.summary}
+                  publishedAt={post.metadata.publishedAt}
+                  link={post.metadata.link || ""}
+                  featured={post.metadata.featured}
+                />
+              ))}
+            </Column>
+          </Accordion>
+        </Column>
+      )}
     </>
   );
 }

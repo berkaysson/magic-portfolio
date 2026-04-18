@@ -1,4 +1,8 @@
 .accordion {
+    border-style: solid;
+    border-width: var(--solid-border-width);
+    border-color: var(--solid-border-color-brand);
+    
     &:hover {
         background: var(--neutral-alpha-weak);
     }
