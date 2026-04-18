@@ -8,6 +8,7 @@ import {
   Heading,
   SmartLink,
   Text,
+  Icon,
 } from "@/once-ui/components";
 
 interface ProjectCardProps {
@@ -19,6 +20,7 @@ interface ProjectCardProps {
   description: string;
   avatars: { src: string }[];
   link: string;
+  featured?: boolean;
 }
 
 export const ProjectCard: React.FC<ProjectCardProps> = ({
@@ -29,9 +31,38 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
   description,
   avatars,
   link,
+  featured,
 }) => {
   return (
-    <Column fillWidth gap="m">
+    <Column
+      fillWidth
+      gap="m"
+      style={{
+        border: featured ? "1px solid var(--brand-alpha-medium)" : "none",
+        borderRadius: "var(--radius-l)",
+        padding: featured ? "12px" : "0",
+        transition: "all 0.2s ease",
+        position: "relative",
+      }}
+    >
+      {featured && (
+        <Icon
+          name="star"
+          size="s"
+          style={{
+            color: "white",
+            position: "absolute",
+            top: "24px",
+            right: "24px",
+            background: "var(--brand-solid-strong)",
+            padding: "8px",
+            borderRadius: "50%",
+            boxShadow: "var(--shadow-m)",
+            zIndex: 10,
+          }}
+          tooltip="Featured Project"
+        />
+      )}
       <Carousel
         sizes="(max-width: 960px) 100vw, 960px"
         images={images.map((image) => ({
@@ -52,6 +83,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             <Heading as="h2" wrap="balance" variant="heading-strong-xl">
               {title}
             </Heading>
+
           </Flex>
         )}
         {(avatars?.length > 0 || description?.trim() || content?.trim()) && (

@@ -26,11 +26,14 @@ export async function generateMetadata() {
 
 export default function Work() {
   const allProjects = getPosts(["src", "app", "work", "projects"]);
-  const sortedProjects = allProjects.sort(
-    (a, b) =>
+  const sortedProjects = allProjects.sort((a, b) => {
+    if (a.metadata.featured && !b.metadata.featured) return -1;
+    if (!a.metadata.featured && b.metadata.featured) return 1;
+    return (
       new Date(b.metadata.publishedAt).getTime() -
-      new Date(a.metadata.publishedAt).getTime(),
-  );
+      new Date(a.metadata.publishedAt).getTime()
+    );
+  });
 
   return (
     <Column maxWidth="m">

@@ -129,9 +129,19 @@ export default function Home() {
         </Column>
       </Column>
       <RevealFx translateY="16" delay={0.6}>
-        <Projects range={[1, 1]} />
+        <Projects featuredOnly />
       </RevealFx>
-      <Projects range={[2]} />
+
+      <RevealFx
+        paddingTop="12"
+        delay={0.1}
+        horizontal="center"
+        paddingBottom="32"
+      >
+        <Button href="/work" variant="secondary" size="m" arrowIcon>
+          View all projects
+        </Button>
+      </RevealFx>
 
       <RevealFx
         paddingTop="12"

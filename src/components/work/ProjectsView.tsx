@@ -14,6 +14,7 @@ interface ProjectData {
     publishedAt: string;
     images: string[];
     team?: { avatar: string }[];
+    featured?: boolean;
     link?: string;
   };
 }
@@ -68,6 +69,7 @@ export function ProjectsView({ projects }: ProjectsViewProps) {
               description={post.metadata.summary}
               publishedAt={post.metadata.publishedAt}
               link={post.metadata.link || ""}
+              featured={post.metadata.featured}
             />
           ) : (
             <ProjectCard
@@ -84,6 +86,7 @@ export function ProjectsView({ projects }: ProjectsViewProps) {
                 })) || []
               }
               link={post.metadata.link || ""}
+              featured={post.metadata.featured}
             />
           ),
         )}

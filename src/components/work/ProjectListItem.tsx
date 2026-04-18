@@ -9,6 +9,7 @@ import {
   SmartLink,
   Tag,
   Text,
+  Icon,
 } from "@/once-ui/components";
 
 interface ProjectListItemProps {
@@ -18,6 +19,7 @@ interface ProjectListItemProps {
   description: string;
   publishedAt: string;
   link: string;
+  featured?: boolean;
 }
 
 export const ProjectListItem: React.FC<ProjectListItemProps> = ({
@@ -27,6 +29,7 @@ export const ProjectListItem: React.FC<ProjectListItemProps> = ({
   description,
   publishedAt,
   link,
+  featured,
 }) => {
   const year = new Date(publishedAt).getFullYear().toString();
   const [hovered, setHovered] = useState(false);
@@ -44,10 +47,30 @@ export const ProjectListItem: React.FC<ProjectListItemProps> = ({
       onMouseLeave={() => setHovered(false)}
       style={{
         borderBottom: "1px solid var(--neutral-border-medium)",
-        transition: "background 0.2s ease",
+        transition: "all 0.2s ease",
         background: hovered ? "var(--neutral-alpha-weak)" : "transparent",
+        borderLeft: featured ? "2px solid var(--brand-solid-strong)" : "none",
+        paddingLeft: featured ? "20px" : "12px",
+        position: "relative",
       }}
     >
+      {featured && (
+        <Icon
+          name="star"
+          size="s"
+          style={{
+            color: "white",
+            position: "absolute",
+            top: "12px",
+            right: "12px",
+            background: "var(--brand-solid-strong)",
+            padding: "8px",
+            borderRadius: "50%",
+            boxShadow: "var(--shadow-m)",
+          }}
+          tooltip="Featured Project"
+        />
+      )}
       {/* Thumbnail — fixed on desktop, full-width on mobile */}
       {images.length > 0 && (
         <SmartLink
@@ -92,6 +115,7 @@ export const ProjectListItem: React.FC<ProjectListItemProps> = ({
               {title}
             </Heading>
           </SmartLink>
+
           <Tag variant="neutral" size="s" label={year} />
         </Flex>
         <Text

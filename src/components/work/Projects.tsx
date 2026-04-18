@@ -6,12 +6,23 @@ import { ProjectListItem } from "@/components/work/ProjectListItem";
 interface ProjectsProps {
   range?: [number, number?];
   viewMode?: "compact" | "expanded";
+  featuredOnly?: boolean;
 }
 
-export function Projects({ range, viewMode = "expanded" }: ProjectsProps) {
+export function Projects({
+  range,
+  viewMode = "expanded",
+  featuredOnly,
+}: ProjectsProps) {
   let allProjects = getPosts(["src", "app", "work", "projects"]);
 
+  if (featuredOnly) {
+    allProjects = allProjects.filter((post) => post.metadata.featured);
+  }
+
   const sortedProjects = allProjects.sort((a, b) => {
+    if (a.metadata.featured && !b.metadata.featured) return -1;
+    if (!a.metadata.featured && b.metadata.featured) return 1;
     return (
       new Date(b.metadata.publishedAt).getTime() -
       new Date(a.metadata.publishedAt).getTime()
@@ -39,6 +50,7 @@ export function Projects({ range, viewMode = "expanded" }: ProjectsProps) {
             description={post.metadata.summary}
             publishedAt={post.metadata.publishedAt}
             link={post.metadata.link || ""}
+            featured={post.metadata.featured}
           />
         ) : (
           <ProjectCard
@@ -54,6 +66,7 @@ export function Projects({ range, viewMode = "expanded" }: ProjectsProps) {
               []
             }
             link={post.metadata.link || ""}
+            featured={post.metadata.featured}
           />
         ),
       )}
