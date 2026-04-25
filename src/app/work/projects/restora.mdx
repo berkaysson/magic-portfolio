@@ -2,7 +2,7 @@
 title: "Restora — AI-Powered High Fidelity Archival Digitization and OCR System"
 publishedAt: "2026-04-06"
 featured: true
-summary: "An AI-powered project designed for the digitization, restoration, and analysis of physical book pages using advanced OCR and image processing techniques."
+summary: "An AI-powered project designed for the digitization and analysis of physical book pages using advanced OCR and layout detection."
 images:
   - "/images/projects/restora/restora-1.png"
   - "/images/projects/restora/restora-2.png"
@@ -16,30 +16,35 @@ team:
 link: "https://github.com/berkaysson/restora"
 ---
 
+## Summary
+
+- Successfully engineered a non-blocking, asynchronous job queue architecture to handle intensive AI models (Surya OCR) without freezing the API.
+- Delivered a highly interactive, dark-themed React 19 interface with real-time WebSocket log streaming and synchronized bounding-box rendering.
+- Python, FastAPI, React 19, TypeScript, TailwindCSS, SQLite, Surya OCR.
+
 ## Overview
 
-Restora is an AI-powered project specifically designed for the digitization, restoration, and analysis of physical book pages. Existing solutions often struggle with noisy scans and complex document structures. Restora addresses this need by leveraging advanced OCR (Object Character Recognition) and image processing techniques to convert scanned book pages into structured, highly accurate digital formats. It provides a localized, end-to-end ecosystem for transforming physical archives into clean, searchable digital assets in multiple languages.
+Restora is an AI-powered project specifically designed for the digitization and analysis of physical book pages. Existing solutions often struggle with complex document structures. Restora addresses this need by leveraging advanced OCR (Object Character Recognition) and layout analysis techniques to convert scanned book pages into structured, highly accurate digital formats. It provides a localized, end-to-end ecosystem for transforming physical archives into structured, searchable digital assets in multiple languages.
 
 ## Architecture & Data Design
 
 The system is built on a decoupled architecture, separating the heavy AI processing from the user interface.
-- **Tech Stack:** The backend is powered by Python 3.10+ and the **FastAPI** framework, utilizing Surya OCR (PyTorch-based) and OpenCV. The frontend is built with **React 19 (Vite)**, **TypeScript**, and styled with **TailwindCSS** and **DaisyUI**.
+- **Tech Stack:** The backend is powered by Python 3.10+ and the **FastAPI** framework, utilizing Surya OCR (PyTorch-based). The frontend is built with **React 19 (Vite)**, **TypeScript**, and styled with **TailwindCSS** and **DaisyUI**.
 - **Data Access:** Data persistence is handled through a localized, auto-generated **SQLite** database, ensuring simple and efficient data storage for books and pages.
-- **Schema:** The core `pages` table stores the original uploaded images, cleaned binary image paths, extracted raw text, and coordinate-based layout JSON data. Additionally, a Storage Manager handles the hierarchical file storage for async jobs, pages, and assets.
+- **Schema:** The core `pages` table stores the original uploaded images, extracted raw text, and coordinate-based layout JSON data. Additionally, a Storage Manager handles the hierarchical file storage for async jobs, pages, and assets.
 
 ## Key Features
 
-Restora offers a numbers of advanced developments and life quality features combined for document restoration:
-- **Image Cleanup:** Uses OpenCV for adaptive thresholding to remove noise and drastically improve the readability of scanned pages before OCR processing.
+Restora offers a numbers of advanced developments and life quality features combined for document analysis:
 - **AI-Powered OCR & Layout Analysis:** Utilizes the Surya OCR engine (featuring Segformer models) for high-accuracy text detection. It not only reads text but extracts coordinate-based layout information (bounding boxes) for complex semantic blocks.
-- **Interactive Document Viewer:** A modern viewer where cleaned images are synchronized with bounding boxes. Users can hover over the text in the editor to highlight its physical location on the image and edit the text or sections with cleverly designed UI, and vice-versa.
+- **Interactive Document Viewer:** A modern viewer where images are synchronized with bounding boxes. Users can hover over the text in the editor to highlight its physical location on the image and edit the text or sections with cleverly designed UI, and vice-versa.
 - **Multi-Page PDF Processing & Export:** Users can upload multi-page PDFs and later export the processed document (or a selected range of pages) as searchable PDFs.
 - **Interaction:** The application supports multi-page navigation without reloading, a historical gallery for past documents, and a line-by-line extracted text editor. Section manager for removing unwanted sections and exporting without them. Live feedback is constantly provided via the integrated real-time WebSocket log panel for whats happening in engine right now.
 
 ## Technical Implementation
 
 The development process involved solving critical performance bottlenecks, especially regarding AI inference times:
-- **Server Actions / API:** To handle long-running OCR tasks without blocking the API, the backend employs a **Job Queue and Worker architecture**. New endpoints like `/upload-pdf`, `/document/{job_id}/cancel`, and `/document/{job_id}/retry-failed` allow fine-grained mutation and management of background tasks. The OCR processing itself is highly modularized into Core, Models, OCR, and Preprocessor components.
+- **Server Actions / API:** To handle long-running OCR tasks without blocking the API, the backend employs a **Job Queue and Worker architecture**. New endpoints like `/upload-pdf`, `/document/{job_id}/cancel`, and `/document/{job_id}/retry-failed` allow fine-grained mutation and management of background tasks. The OCR processing itself is highly modularized into Core, Models, and OCR components.
 - **Security:** *Note: As Restora is designed primarily as a localized tool running on `localhost`, complex RBAC or authentication mechanisms are not natively implemented in the current scope.*
 - **State Management:** The frontend utilizes React Context to manage global states. A key implementation is the use of **WebSockets** to stream real-time processing logs and progress updates directly from the backend workers to the UI.
 
@@ -47,8 +52,3 @@ The development process involved solving critical performance bottlenecks, espec
 
 - [GitHub Repository](https://github.com/berkaysson/restora)
 
-## Summary
-
-- Successfully engineered a non-blocking, asynchronous job queue architecture to handle intensive AI models (Surya OCR) without freezing the API.
-- Delivered a highly interactive, dark-themed React 19 interface with real-time WebSocket log streaming and synchronized bounding-box rendering.
-- Python, FastAPI, React 19, TypeScript, TailwindCSS, SQLite, Surya OCR, OpenCV.

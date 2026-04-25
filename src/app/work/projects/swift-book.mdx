@@ -17,15 +17,23 @@ link: "https://github.com/berkaysson/multi-tenant-scheduler"
 github: "https://github.com/berkaysson/multi-tenant-scheduler"
 ---
 
+## Summary
+
+- Architected a scalable multi-tenant infrastructure using an Organization model as the tenant root, supporting organization-specific settings and role-based access control.
+- Developed a real-time notification engine utilizing Supabase subscriptions and a NotificationBell component to provide instant updates on appointment status changes without page reloads for both organization owner and user-customer.
+- Integrated NextAuth.js v5 for hybrid authentication and utilized middleware for granular route protection across public, authenticated, and organization-specific paths.
+- Designed a high-fidelity interface using Shadcn UI and Tailwind CSS, featuring interactive dialogs and dynamic navigation optimized for all device scales.
+- Developed a comprehensive scheduling system for weekly hours, available days, exceptions and holidays with backend logic to prevent double-bookings.
+
 ## Overview
 
-SwiftBook is a robust, multi-tenant scheduling application designed to streamline appointment booking for organizations ranging from medical clinics to consultancy firms. It addresses the inefficiencies of traditional manual scheduling, such as communication breakdowns and double-booking errors. Unlike simple booking tools, SwiftBook is architected as a platform where users can manage multiple organizations, define complex availability logic, and handle staff roles securely.
+SwiftBook is a comprehensive, multi-tenant scheduling application designed to streamline appointment booking for organizations ranging from medical clinics to consultancy firms. It addresses the inefficiencies of traditional manual scheduling, such as communication breakdowns and double-booking errors. Unlike simple booking tools, SwiftBook is architected as a platform where users can manage multiple organizations, define complex availability logic, and handle staff roles securely.
 
-Built on **Next.js 14 (App Router)**, it leverages a modern stack including **PostgreSQL**, **Prisma**, and **NextAuth.js v5** to ensure performance and security.
+Built on **Next.js (App Router)**, it leverages a modern stack including **PostgreSQL**, **Prisma**, and **NextAuth.js v5** to ensure performance and security.
 
 ## Architecture & Data Design
 
-The core strength of SwiftBook lies in its **Data Access Layer** separation. The application strictly separates database interactions (`src/data`) from server actions (`src/actions`), ensuring modularity and testability.
+SwiftBook's architecture leverages a decoupled **Data Access Layer** to isolate database logic, integrating a **multi-tenant** infrastructure with granular **RBAC** via **NextAuth.js v5** to ensure strict data isolation across organizations and different user roles.
 
 ### Database Schema (Prisma)
 
@@ -89,7 +97,7 @@ SwiftBook utilizes Next.js Server Actions for all data mutations, ensuring type 
 
 The UI is constructed using **ShadCN UI** and **Tailwind CSS**, organized by feature context:
 
-- **Atomic Design**: Components are split into logical directories: `auth`, `navigation`, `appointments`, and `organizations`.
+- **Readable Structure**: Components are split into logical directories: `auth`, `navigation`, `appointments`, and `organizations`.
 - **Reusable Forms**: Form logic is encapsulated in components like `LoginForm` and `RegisterForm`, utilizing `react-hook-form` for efficient state management.
 
 ## Future Roadmap & Scalability
@@ -101,6 +109,3 @@ While the current MVP delivers a robust scheduling experience, the project archi
 - **Calendar Synchronization**: Future updates aim to sync SwiftBook appointments with external providers like Google Calendar and Outlook.
 - **Advanced Analytics**: Plans to introduce detailed dashboards for organization owners to track cancellation rates, peak booking hours, and staff performance.
 
-## Summary
-
-SwiftBook represents a complete SaaS boilerplate for scheduling needs. By solving complex problems like time zone management, role-based access control, and real-time state synchronization, it provides a solid foundation for any booking-intensive business requirement.
