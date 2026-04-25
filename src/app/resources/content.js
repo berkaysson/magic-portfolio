@@ -48,17 +48,17 @@ const home = {
   path: "/",
   image: "/images/og/home.jpg",
   label: "Home",
-  title: "Berkay Sonel - Frontend Developer",
+  title: "Berkay Sonel, MSc - Software Engineer",
   description:
-    "Results-driven Frontend Developer with 2+ years building high-performance, responsive web applications.",
-  headline: "Architecting Scalable Web Solutions",
+    "Computer Engineer (MSc) with a 3.83 GPA, specializing in architecting scalable SaaS platforms, distributed systems, and Cloud-native solutions.",
+  headline: "Engineering Scalable Systems & Solutions",
   featured: {
     display: true,
-    title: "Featured Project: Habivita (SaaS Productivity App)",
-    href: "/work/habivita",
+    title: "Latest: Restora (AI-Powered Document Archival System)",
+    href: "/work/restora",
   },
   subline:
-    "I'm Berkay, a results-driven Frontend Developer with Full Stack Capabilities. I specialize in crafting scalable, high-performance UIs and delivering solutions that integrate complex frontend-backend systems.",
+    "I am Berkay, a Master of Science in Computer Engineering specializing in .NET Core, Next.js, and Azure cloud architecture. I build high-performance multi-tenant applications and integrate complex AI workflows into enterprise environments.",
 };
 
 const about = {
@@ -66,7 +66,7 @@ const about = {
   label: "About",
   title: "About – Berkay Sonel",
   description:
-    "Berkay Sonel, a results-driven Frontend Developer specializing in high-performance web applications based in Ankara, Turkey.",
+    "Berkay Sonel, a Software Engineer (MSc) specializing in scalable SaaS architectures and Cloud-native solutions, based in Ankara, Turkey.",
   tableOfContent: {
     display: true,
     subItems: true,
@@ -82,31 +82,23 @@ const about = {
     display: true,
     title: "Introduction",
     description:
-      "Berkay is a results-driven Frontend Developer with an M.Sc. in Computer Engineering and 2+ years of experience building high-performance, responsive web applications. He is proficient in leading development initiatives, optimizing performance (code splitting, caching), and integrating complex systems using React, Next.js, and ASP.NET.", // Team Leader concept softened to "leading development initiatives"
+      "Berkay is a Software Engineer holding an M.Sc. in Computer Engineering (GPA: 3.83) with over 2.5 years of experience architecting end-to-end SaaS platforms.  Having led engineering initiatives at IKBOX, he specializes in building backend services with ASP.NET Core and high-performance frontends using React.js. His expertise lies in optimizing distributed systems, implementing secure software architectures.",
   },
   work: {
     display: true,
     title: "Professional Experience",
     experiences: [
       {
-        company: "Siem Group",
+        company: "İkbox",
         timeframe: "Jun 2024 – Present",
-        role: "Frontend Developer | Team Leader", // Title remains here
+        role: "Full Stack Developer | Team Leader",
         achievements: [
-          "Directed frontend implementation of a modular Human Resources Management Application (ikbox.tr) using React.js and Material UI.",
-          "Optimized 200+ API integrations using TanStack Query, cutting API latency by 200ms on average.",
-          "Architected 100+ responsive screens, implementing lazy loading and code splitting to improve performance.",
-          "Guided 5+ interns through code reviews and technical feedback, ensuring a scalable React.js codebase.",
-        ],
-        images: [],
-      },
-      {
-        company: "Pay Gençlik Association (Volunteer)",
-        timeframe: "Mar 2024 – Jun 2024",
-        role: "Volunteer Software Developer",
-        achievements: [
-          "Rapidly delivered and deployed the association's website, enhancing usability for non-technical content management.",
-          "Provided technical support and contributed to member recruitment by interviewing new members.",
+          "Architecture & Frontend Management: Directed the frontend architecture of an enterprise HR SaaS (ikbox.tr), developing a modular UI component library that increased feature delivery speed by 40%.",
+          "Backend Engineering: Built and maintained scalable services using ASP.NET Core, implementing CQRS, MediatR, and Unit of Work patterns to ensure a decoupled and testable codebase.",
+          "Performance Optimization: Optimized over 200 API integrations using TanStack Query for caching and request deduplication, reducing redundant network traffic by 50% and cutting API latency.",
+          "Data Security & Validation: Secured 50+ complex administrative forms using React Hook Form and Zod; implemented Role-Based Access Control (RBAC) using JWT and Frontend paradigms.",
+          "System Integration & DevOps: Managed database schema design and migrations on MSSQL via Entity Framework Core; supervised automated deployment pipelines through Jenkins for production releases.",
+          "Technical Leadership: Led a team of 5+ interns, conducting code reviews and enforcing SOLID principles to maintain high code quality and minimize technical debt.",
         ],
         images: [],
       },
@@ -115,9 +107,11 @@ const about = {
         timeframe: "Jul 2023 – Jan 2024",
         role: "Intern Full Stack Developer",
         achievements: [
-          "Developed RESTful APIs with ASP.NET Core and integrated them with React-based frontends.",
-          "Implemented role-based authentication using Identity, JWT, and EF Core to secure systems.",
-          "Gained hands-on expertise in Agile/Scrum, Azure, and React.js during the program.",
+          "Selected from 12,000+ applicants for a 7-month intensive program, contributing to full-stack applications within a cloud-focused environment.",
+          "Backend Engineering: Developed RESTful APIs using ASP.NET Core and optimized database interactions with MSSQL via Entity Framework Core.",
+          "Security Implementation: Established secure Role-Based Access Control (RBAC) using ASP.NET Identity and JWT to manage user permissions and authentication.",
+          "Frontend Optimization: Built interactive user interfaces with React.js and improved performance through route-based code splitting.",
+          "Cloud & Agile Integration: Collaborated within an Agile/Scrum framework to deploy and monitor applications on Microsoft Azure, utilizing App Service and SQL Server.",
         ],
         images: [],
       },
@@ -130,20 +124,22 @@ const about = {
       {
         name: "Selçuk University",
         description:
-          "M.Sc. in Computer Engineering (2026) – Graduated with 96/100 High Honor",
+          "M.Sc. in Computer Engineering (2024 – 2026) – GPA: 3.83/4.00 (High Honor). Focused on Software Architecture and Advanced Algorithms.",
+      },
+      {
+        name: "Microsoft & Koç Holding | Ctrl + Future",
+        description:
+          "Graduate Software Development Program (2023) – Selected from 12,000+ applicants (Top 1%). Intensive training on Azure, Agile, and Full-Stack Development.",
       },
       {
         name: "Çankaya University",
-        description: "Bachelor's in Civil Engineering (2023) – GPA: 2.9",
-      },
-      {
-        name: "Koç Holding A.Ş.",
         description:
-          "Frontend Developer Program (2023) – Intensive bootcamp focused on Agile, Azure, and full-stack web dev.",
+          "B.Sc. in Civil Engineering (2023) – Developed strong analytical and structural problem-solving foundations.",
       },
       {
-        name: "Microsoft",
-        description: "Azure Fundamentals Certification (2023)",
+        name: "Professional Certifications",
+        description:
+          "Microsoft Certified: Azure Fundamentals (AZ-900), AZ-204 (In Progress), YDS: 88 (Professional English Proficiency).",
       },
     ],
   },
@@ -152,33 +148,33 @@ const about = {
     title: "Technical Expertise",
     skills: [
       {
-        title: "Frontend & Performance",
+        title: "Frontend Architecture",
         description:
-          "JavaScript/TypeScript, React, Next.js. Expertise in TanStack Query (caching, optimistic updates), code splitting, and custom hooks.",
+          "TypeScript, React, Next.js (App Router & Server Actions). Deep expertise in TanStack Query for caching and state synchronization, code splitting, and custom hooks.",
         images: [],
       },
       {
-        title: "Backend & Security",
+        title: "Backend & Systems",
         description:
-          "ASP.NET / C#, Entity Framework Core. Implemented JWT, Identity, and role-based access control for security.",
+          "C# / .NET Core (CQRS, MediatR, Unit of Work patterns), Python (FastAPI). Asynchronous job queues and real-time systems via WebSockets.",
         images: [],
       },
       {
-        title: "Database & ORMs",
+        title: "Data & Persistence",
         description:
-          "PostgreSQL (Prisma, Supabase) and MSSQL (Entity Framework Core).",
+          "PostgreSQL (Prisma, Supabase), MSSQL (Entity Framework Core), and Redis for distributed caching. Managed complex relational schema designs and migrations.",
         images: [],
       },
       {
-        title: "DevOps & Tools",
+        title: "Cloud & Infrastructure",
         description:
-          "Azure, Git/GitHub, Jenkins, Agile methods (Jira, Confluence, Trello).",
+          "Microsoft Azure (App Service, SQL Server, Key Vault), Docker containerization, Jenkins for CI/CD pipeline automation.",
         images: [],
       },
       {
-        title: "UI/UX & Testing",
+        title: "Security & Quality",
         description:
-          "Material UI, Tailwind CSS, Shadcn UI. Unit testing with Jest, ESLint, and Prettier.",
+          "Identity & JWT-based RBAC, OAuth, Zod validation. Unit testing with Jest. Strict adherence to SOLID principles and Clean Architecture.",
         images: [],
       },
     ],

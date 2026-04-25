@@ -186,7 +186,7 @@ export default function About() {
                           variant="secondary"
                         />
                       </React.Fragment>
-                    )
+                    ),
                 )}
               </Flex>
             )}
@@ -242,7 +242,7 @@ export default function About() {
                     >
                       {experience.role}
                     </Text>
-                    <Column as="ul" gap="16">
+                    <Column as="ul" gap="4">
                       {experience.achievements.map(
                         (achievement: string, index: number) => (
                           <Text
@@ -252,7 +252,7 @@ export default function About() {
                           >
                             {achievement}
                           </Text>
-                        )
+                        ),
                       )}
                     </Column>
                     {experience.images.length > 0 && (
@@ -304,13 +304,14 @@ export default function About() {
                     fillWidth
                     gap="4"
                   >
-                    <Text id={institution.name} variant="heading-strong-l">
-                      {institution.name}
-                    </Text>
                     <Text
-                      variant="heading-default-xs"
+                      id={institution.name}
+                      variant="heading-strong-l"
                       onBackground="neutral-weak"
                     >
+                      {institution.name}
+                    </Text>
+                    <Text variant="heading-default-xs">
                       {institution.description}
                     </Text>
                   </Column>
@@ -332,10 +333,13 @@ export default function About() {
               <Column fillWidth gap="l">
                 {about.technical.skills.map((skill, index) => (
                   <Column key={`${skill}-${index}`} fillWidth gap="4">
-                    <Text variant="heading-strong-l">{skill.title}</Text>
-                    <Text variant="body-default-m" onBackground="neutral-weak">
-                      {skill.description}
+                    <Text
+                      variant="heading-strong-l"
+                      onBackground="neutral-weak"
+                    >
+                      {skill.title}
                     </Text>
+                    <Text variant="body-default-m">{skill.description}</Text>
                     {skill.images && skill.images.length > 0 && (
                       <Flex fillWidth paddingTop="m" gap="12" wrap>
                         {skill.images.map((image, index) => (
