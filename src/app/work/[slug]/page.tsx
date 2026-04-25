@@ -61,7 +61,7 @@ export default async function Project({
     : routeParams.slug || "";
 
   let post = getPosts(["src", "app", "work", "projects"]).find(
-    (post) => post.slug === slugPath
+    (post) => post.slug === slugPath,
   );
 
   if (!post) {
@@ -104,16 +104,34 @@ export default async function Project({
         <Heading variant="display-strong-s">{post.metadata.title}</Heading>
       </Column>
       {post.metadata.images.length > 0 && (
-        <SmartImage
-          priority
-          aspectRatio="4 / 3"
-          radius="m"
-          alt="image"
-          src={post.metadata.images[0]}
-          sizes="100vw"
-          unoptimized
-          objectFit="contain"
-        />
+        <Flex
+          fillWidth
+          gap="24"
+          direction="column"
+          vertical="center"
+          horizontal="center"
+        >
+          <SmartImage
+            priority
+            aspectRatio="4 / 3"
+            radius="m"
+            alt="image"
+            src={post.metadata.images[0]}
+            sizes="100vw"
+            unoptimized
+            objectFit="contain"
+          />
+          {post.metadata.images.length > 1 && (
+            <Button
+              href="#gallery"
+              variant="secondary"
+              size="s"
+              prefixIcon="chevronDown"
+            >
+              Gallery
+            </Button>
+          )}
+        </Flex>
       )}
       <Column style={{ margin: "auto" }} as="article" maxWidth="xs">
         <Flex gap="12" marginBottom="24" vertical="center">
@@ -126,10 +144,9 @@ export default async function Project({
         </Flex>
         <CustomMDX source={post.content} />
       </Column>
-      {post.metadata.images.length > 1 &&
-        post.metadata.images
-          .slice(1)
-          .map((image, index) => (
+      {post.metadata.images.length > 1 && (
+        <Flex id="gallery" fillWidth direction="column" gap="l">
+          {post.metadata.images.slice(1).map((image, index) => (
             <SmartImage
               key={index}
               priority
@@ -141,6 +158,8 @@ export default async function Project({
               objectFit="contain"
             />
           ))}
+        </Flex>
+      )}
       <ScrollToHash />
     </Column>
   );
