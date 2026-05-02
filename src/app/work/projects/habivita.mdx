@@ -22,8 +22,9 @@ link: "https://lifemap-next.vercel.app"
 
 - Developed a  full-stack multi-entity SaaS ecosystem for life-improvement platform with todos, tasks, habits, categories, projects, notes, charts-analytics and activity tracking.
 - Integrated real-time logging and progress analytics using PostgreSQL, Prisma, and Supabase.
-- Designed a high-fidelity, responsive interface using Shadcn UI and TailwindCSS, prioritizing visual hierarchy and cross-device performance.
-- Improved authentication and state management skills with NextAuth and Tanstack Query.
+- Optimized expensive server-side aggregations and complex summary-progress calculations using **Next.js server side cache** for high-performance data retrieval.
+- Achieved high code reliability by implementing **Unit Testing** for core business logic and helper modules using **Jest**, effectively reducing technical debt.
+- Designed a high-fidelity, responsive interface using Shadcn UI and TailwindCSS, prioritizing visual hierarchy.
 
 ## Overview
 
@@ -31,45 +32,37 @@ Habivita is a personal journey companion designed to empower users in achieving 
 
 ## Key Features
 
-- **Comprehensive Dashboard**: Provides a high-level overview of habits, tasks, and activities with charts and analytics that make tracking progress intuitive.
-- **Activity Logging**: Users can log time spent on any activity (e.g., study, fitness, hobbies) to gain insights and inform goal-setting.
-- **To-Do Management**: Create and manage simple, actionable to-dos. Mark them as completed or pending to keep your short-term goals organized.
-- **Task Tracking**: Define goals with specific deadlines and monitor their progress dynamically based on your logged time, not just status toggles.
-- **Habit Formation**: Build and sustain habits with frequency settings and recurring activity definitions to promote consistency and personal growth.
-- **Project Management**: Group related tasks and to-dos into structured projects that align with larger life goals or work initiatives.
-- **Contextual Note-Taking**: Integrated rich-text note management linked to specific habits, todos or tasks via #mentions, enabling users to document progress and thoughts.
-- **Progress Insights**: Visualize your productivity patterns with detailed charts and reports.
+- **Scalable Performance Analytics**: Utilizes server-side caching mechanisms to deliver instantaneous progress reports even with large datasets of logged activities.
+- **Reliable Business Logic**: Core modules (notes, habits, and progress tracking) are backed by a comprehensive suite of unit tests to ensure consistent behavior during scaling.
+- **Comprehensive Dashboard**: Provides a high-level overview of habits, tasks, and activities with charts and analytics.
+- **Activity Logging**: Users can log time spent on any activity to gain insights and inform goal-setting.
+- **Contextual Note-Taking**: Integrated rich-text note management linked to specific habits, todos or tasks via #mentions.
 
 ## Technologies Used
 
 - **Frontend & Backend**:
-  - **Next.js** (with server-side rendering)
+  - **Next.js** (App Router, Server Actions)
   - **TypeScript**
-  - **Tanstack Query** (for efficient data fetching and caching)
-  - **NextAuth** (for secure authentication)
+  - **Tanstack Query** (Client-side state & caching)
+  - **Jest** (Unit Testing)
 
 - **Database & Hosting**:
-  - **PostgreSQL**
-  - **Prisma** (ORM)
-  - **Supabase** (for database hosting and authentication)
-  - **Vercel** (for fast and scalable deployment)
+  - **PostgreSQL** & **Prisma** (ORM)
+  - **Supabase** (DB Hosting & Auth)
+  - **Vercel** (Deployment & Serverless Functions)
 
 - **Styling & UI**:
-  - **TailwindCSS**
-  - **Shadcn UI**
-  - **Material UI**
+  - **TailwindCSS**, **Shadcn UI**, **Material UI**
 
 ## Challenges and Learnings
 
-Building a unified system that tracks both qualitative (habits, to-dos) and quantitative (time-logged activities) data presented architectural challenges. Dynamic updates, cross-component syncing, and visual consistency were top priorities.
+Building a unified system that tracks qualitative and quantitative data required strict architectural discipline. Implementing `unstable_cache` addressed performance bottlenecks in server-side rendering of analytics, while Jest was introduced to mitigate regression risks during rapid feature iterations.
 
-Handling authentication, database schema design for flexible task types, and visualizing time-based data with clarity also pushed the boundaries of UI/UX and performance optimization in a full-stack application.
+Handling database schema design for flexible task types and visualizing time-based data pushed the boundaries of UI/UX and full-stack performance optimization.
 
 ## Outcome
 
-Habivita evolved into a robust, user-centric app that empowers individuals to gain control over their time and aspirations. It allowed me to deepen my skills in full-stack development, particularly with Next.js, Supabase, and scalable UI design using modern libraries.
-
-The project stands as a reflection of my passion for productivity tools, thoughtful design, and building software that adds meaning to everyday life.
+Habivita evolved into a production-ready app that demonstrates mastery over modern Next.js patterns, performance tuning, and test-driven development (TDD) principles. It serves as a benchmark for building maintainable, high-performance SaaS applications.
 
 ## Try It Now
 

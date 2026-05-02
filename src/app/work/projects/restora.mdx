@@ -20,6 +20,8 @@ link: "https://github.com/berkaysson/restora"
 
 - Successfully engineered a non-blocking, asynchronous job queue architecture to handle intensive AI models (Surya OCR) without freezing the API.
 - Delivered a highly interactive, dark-themed React 19 interface with real-time WebSocket log streaming and synchronized bounding-box rendering.
+- Developed a centralized layout engine for deterministic document reconstruction, optimizing font and spatial calculations across both the UI and PDF generation pipelines.
+- Implemented heuristic reading order detection and geometric data analysis to automatically extract and apply style metadata (e.g., bold, italic) to semantic blocks.
 - Python, FastAPI, React 19, TypeScript, TailwindCSS, SQLite, Surya OCR.
 
 ## Overview
@@ -37,14 +39,17 @@ The system is built on a decoupled architecture, separating the heavy AI process
 
 Restora offers a numbers of advanced developments and life quality features combined for document analysis:
 - **AI-Powered OCR & Layout Analysis:** Utilizes the Surya OCR engine (featuring Segformer models) for high-accuracy text detection. It not only reads text but extracts coordinate-based layout information (bounding boxes) for complex semantic blocks.
+- **Heuristic Layout Reconstruction:** Automatically determines the logical reading order of identified labels. It dynamically extracts style properties (such as font weight and posture) by analyzing geometric bounding box data rather than relying on hardcoded constraints.
+- **Data-Driven UI (Confidence Map):** Integrates a gradient-based visual layer representing OCR confidence scores directly onto the line-based interface, bridging raw API metrics with user experience.
+- **Dual-Layer Visualization:** Provides both line-based and semantic/geometric block-based viewing infrastructures for high-fidelity document inspection.
 - **Interactive Document Viewer:** A modern viewer where images are synchronized with bounding boxes. Users can hover over the text in the editor to highlight its physical location on the image and edit the text or sections with cleverly designed UI, and vice-versa.
 - **Multi-Page PDF Processing & Export:** Users can upload multi-page PDFs and later export the processed document (or a selected range of pages) as searchable PDFs.
-- **Interaction:** The application supports multi-page navigation without reloading, a historical gallery for past documents, and a line-by-line extracted text editor. Section manager for removing unwanted sections and exporting without them. Live feedback is constantly provided via the integrated real-time WebSocket log panel for whats happening in engine right now.
 
 ## Technical Implementation
 
 The development process involved solving critical performance bottlenecks, especially regarding AI inference times:
 - **Server Actions / API:** To handle long-running OCR tasks without blocking the API, the backend employs a **Job Queue and Worker architecture**. New endpoints like `/upload-pdf`, `/document/{job_id}/cancel`, and `/document/{job_id}/retry-failed` allow fine-grained mutation and management of background tasks. The OCR processing itself is highly modularized into Core, Models, and OCR components.
+- **Centralized Layout Algorithm:** Consolidated all repetitive rendering mathematics for PDF generation and UI rendering into a single reusable module, adhering strictly to DRY principles and preventing spatial rendering discrepancies.
 - **Security:** *Note: As Restora is designed primarily as a localized tool running on `localhost`, complex RBAC or authentication mechanisms are not natively implemented in the current scope.*
 - **State Management:** The frontend utilizes React Context to manage global states. A key implementation is the use of **WebSockets** to stream real-time processing logs and progress updates directly from the backend workers to the UI.
 
