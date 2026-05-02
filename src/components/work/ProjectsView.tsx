@@ -17,6 +17,7 @@ interface ProjectData {
     featured?: boolean;
     link?: string;
     archived?: boolean;
+    technologies?: string[];
   };
 }
 
@@ -77,6 +78,7 @@ export function ProjectsView({ projects }: ProjectsViewProps) {
               publishedAt={post.metadata.publishedAt}
               link={post.metadata.link || ""}
               featured={post.metadata.featured}
+              technologies={post.metadata.technologies}
             />
           ) : (
             <ProjectCard
@@ -94,6 +96,7 @@ export function ProjectsView({ projects }: ProjectsViewProps) {
               }
               link={post.metadata.link || ""}
               featured={post.metadata.featured}
+              technologies={post.metadata.technologies}
             />
           ),
         )}
@@ -113,6 +116,7 @@ export function ProjectsView({ projects }: ProjectsViewProps) {
                   publishedAt={post.metadata.publishedAt}
                   link={post.metadata.link || ""}
                   featured={post.metadata.featured}
+                  technologies={post.metadata.technologies}
                 />
               ))}
             </Column>

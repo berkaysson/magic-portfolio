@@ -10,6 +10,7 @@ import {
   Text,
   Icon,
 } from "@/once-ui/components";
+import { TechStack } from "./TechStack";
 
 interface ProjectCardProps {
   href: string;
@@ -21,6 +22,7 @@ interface ProjectCardProps {
   avatars: { src: string }[];
   link: string;
   featured?: boolean;
+  technologies?: string[];
 }
 
 export const ProjectCard: React.FC<ProjectCardProps> = ({
@@ -32,6 +34,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
   avatars,
   link,
   featured,
+  technologies,
 }) => {
   return (
     <Column
@@ -93,6 +96,9 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
               <Text wrap="balance" variant="body-default-s" onBackground="neutral-weak">
                 {description}
               </Text>
+            )}
+            {technologies && technologies.length > 0 && (
+              <TechStack technologies={technologies} gap="8" />
             )}
             <Flex gap="24" wrap>
               {content?.trim() && (

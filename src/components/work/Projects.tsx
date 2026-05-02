@@ -51,6 +51,7 @@ export function Projects({
             publishedAt={post.metadata.publishedAt}
             link={post.metadata.link || ""}
             featured={post.metadata.featured}
+            technologies={post.metadata.technologies}
           />
         ) : (
           <ProjectCard
@@ -67,6 +68,7 @@ export function Projects({
             }
             link={post.metadata.link || ""}
             featured={post.metadata.featured}
+            technologies={post.metadata.technologies}
           />
         ),
       )}

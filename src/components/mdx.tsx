@@ -169,6 +169,9 @@ const components = {
   Icon: dynamic(() => import("@/once-ui/components").then(mod => mod.Icon)),
   SmartImage: dynamic(() => import("@/once-ui/components").then(mod => mod.SmartImage)),
   SmartLink: dynamic(() => import("@/once-ui/components").then(mod => mod.SmartLink)),
+  TechStack: dynamic(() => import("./TechStack").then(mod => mod.TechStack)),
+  TechCard: dynamic(() => import("./TechCard").then(mod => mod.TechCard)),
+  TechBadge: dynamic(() => import("./TechBadge").then(mod => mod.TechBadge)),
 };
 
 type CustomMDXProps = MDXRemoteProps & {

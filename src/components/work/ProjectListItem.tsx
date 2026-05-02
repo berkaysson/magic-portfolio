@@ -11,6 +11,7 @@ import {
   Text,
   Icon,
 } from "@/once-ui/components";
+import { TechStack } from "../TechStack";
 
 interface ProjectListItemProps {
   href: string;
@@ -20,6 +21,7 @@ interface ProjectListItemProps {
   publishedAt: string;
   link: string;
   featured?: boolean;
+  technologies?: string[];
 }
 
 export const ProjectListItem: React.FC<ProjectListItemProps> = ({
@@ -30,6 +32,7 @@ export const ProjectListItem: React.FC<ProjectListItemProps> = ({
   publishedAt,
   link,
   featured,
+  technologies,
 }) => {
   const year = new Date(publishedAt).getFullYear().toString();
   const [hovered, setHovered] = useState(false);
@@ -130,6 +133,9 @@ export const ProjectListItem: React.FC<ProjectListItemProps> = ({
         >
           {description}
         </Text>
+        {technologies && technologies.length > 0 && (
+          <TechStack technologies={technologies} />
+        )}
 
         {/* Actions — visible inline on mobile, right-aligned on desktop */}
         <Flex

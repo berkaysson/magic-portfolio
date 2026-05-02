@@ -16,6 +16,7 @@ import { formatDate } from "@/app/utils/formatDate";
 import ScrollToHash from "@/components/ScrollToHash";
 import { Metadata } from "next";
 import { Meta, Schema } from "@/once-ui/modules";
+import { TechStack } from "@/components/TechStack";
 
 export async function generateStaticParams(): Promise<{ slug: string }[]> {
   const posts = getPosts(["src", "app", "work", "projects"]);
@@ -142,6 +143,9 @@ export default async function Project({
             {post.metadata.publishedAt && formatDate(post.metadata.publishedAt)}
           </Text>
         </Flex>
+        {post.metadata.technologies && (
+          <TechStack technologies={post.metadata.technologies} variant="card" />
+        )}
         <CustomMDX source={post.content} />
       </Column>
       {post.metadata.images.length > 1 && (
