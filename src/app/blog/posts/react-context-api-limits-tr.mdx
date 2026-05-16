@@ -1,0 +1,87 @@
+---
+title: "Enterprise React Uygulamalarında Context API'nin Sınırları"
+publishedAt: "2026-05-16"
+summary: "React Context, ideal kullanım senaryoları ve global state manager olarak yanlış kullanıldığında yarattığı re-render darboğazları üzerine analitik bir derinlemesine inceleme."
+tag: "#React"
+---
+
+## Context Yanılgısı
+
+React Context API sıklıkla yanlış anlaşılmaktadır. Geliştiriciler genellikle orta ve büyük ölçekli uygulamalarda bunu varsayılan global state management çözümü olarak benimserler. Mimari açıdan bu bir hatadır ve frontend performansı için kötü haberdir.
+
+Özünde Context, tek ve spesifik bir sorunu (prop-drilling) çözmek için tasarlanmış kesin bir **dependency injection** mekanizmasıdır. Değişkenleri, her ara seviyede propları manuel olarak geçirmeye gerek kalmadan component ağacının derinliklerine broadcast etmenizi sağlar. Sonuç olarak Context; **theming** (dark/light mode geçişleri) veya **authentication state** (giriş sonrası `currentUser` veya session objesinin inject edilmesi) gibi statik veya düşük frekanslı güncellenen verileri inject etmek için oldukça etkilidir. Bu veri noktaları standart bir kullanıcı oturumu sırasında nadiren mutate olduğundan, application ağacının global bir re-render'ı matematiksel olarak kabul edilebilir ve hatta genellikle tercih edilir.
+
+Aksine, gerçek bir state management aracı (Zustand, Redux veya Signals gibi) Publish-Subscribe (Pub/Sub) modeliyle çalışır. Componentler state ağacının çok spesifik slicelarına subscribe olur ve **bir slice mutate olduğunda yalnızca bu spesifik olarak subscribe olan componentlerin güncellenmesini sağlar**. Ancak Context API kaba kuvvet (brute-force) bir broadcasterdır; bir mutation meydana geldiğinde tüm consumer ağacını re-render eder. Kritik hata noktası, mühendislerin Context'i real-time WebSocket verileri, karmaşık çok adımlı formlar veya yüksek frekanslı UI toggle'ları gibi oldukça dinamik, transient stateleri yönetmek için kullanmaya çalıştıklarında ortaya çıkar. Bu senaryolarda, `useContext` aracılığıyla bu Context'i consume eden her bir component, her bir mutation'da re-render edilmeye zorlanır. Context'in geniş re-render'ı ile Zustand'ın slice re-render'ı arasındaki deneysel farkı gözlemlemek için bu [canlı demoya](https://www.adamhinckley.com/articles/zustand-vs-context#live-demo) bakabilirsiniz.
+
+## Memoization Pansumanı: useMemo ve useCallback'in Sınırları
+
+React Context'in broadcasting ve re-render maliyetini hafifletmek için standart uygulama, provider'ın value payload'unu `useMemo` kullanarak memoize etmeyi ve mutation fonksiyonlarını `useCallback` ile sarmalamayı içerir.
+
+### Neyi Çözer
+
+*   **Parent Render Isolation:** Context Provider'ı barındıran component, ilgisiz state değişiklikleri nedeniyle re-render edildiğinde, memoize edilmemiş bir `value={{ state, dispatch }}` yeni bir object referansı oluşturur.
+*   **Reference Stabilization:** `useMemo` bu referansı stabilize eder. Gerçek dependency'ler değişmedikçe consumerlar re-render edilmez.
+
+### Nerede Yetersiz Kalır
+
+Memoization yüzeysel bir yamadır, mimari bir çözüm değildir. Dinamik koşullar altında başarısız olur:
+
+*   **Inevitable Invalidation:** Altta yatan gerçek state mutate olduğunda, `useMemo` dependency array'i bir recalculation tetikler. Yeni bir object referansı oluşturulur.
+*   **The Broadcast Penalty:** Yeni referans oluşturulduktan sonra React, memoization'ı atlar ve her `useContext` consumer'ını re-render edilmeye zorlar.
+*   **False Granularity:** Bir consumer yalnızca `state.sidebarOpen`'a bağlıysa, ancak `state.userRole` mutate olursa, consumer yine de re-render edilir.
+
+Memoization, consumerları parent component'in render cycle'larından korur, ancak consumerları Context'in doğasında bulunan broadcasting mekaniklerinden korumaz.
+
+## İleri Seviye Optimizasyon: Context Split Pattern
+
+Context broadcasting overhead'ini en aza indirmek için yapısal bir yaklaşım Context Split Pattern'dir. Bu, state payload'unu mutation mantığından decouple etmeyi içerir.
+
+Mimari, tek bir provider'a birleştirilmiş bir obje (`value={{ state, dispatch }}`) geçirmek yerine iki ayrı context zorunlu kılar:
+*   `StateContext`: Veri payload'unu broadcast eder.
+*   `DispatchContext`: Mutation fonksiyonlarını broadcast eder.
+
+### Mimari Avantajları
+
+*   **Action Isolation:** Yalnızca state değişikliklerini tetikleyen componentler (örneğin, bir "Submit" butonu veya toggle switch) yalnızca `DispatchContext`'i consume eder.
+*   **Render Prevention:** `DispatchContext` içindeki fonksiyon referansları renderlar boyunca stabil kaldığı için, `StateContext` içindeki altta yatan veri mutate olduğunda bu action-dispatching componentleri re-render edilmez.
+
+### Sistem Kısıtları
+
+Bu pattern dispatcherları izole etse de, state consumerları için Context'in temel sınırlamasını çözmede başarısız olur.
+
+*   **State Broadcasting Persists:** `StateContext`'i consume eden herhangi bir component, herhangi bir state property mutation'ında tamamen re-render edilmeye devam edecektir. Sıfır granular slice-level subscription yeteneği sunar.
+*   **Architectural Overhead:** Çift provider'ları ve bunlara karşılık gelen custom hookları (`useAppState`, `useAppDispatch`) yönetmek, domain başına boilerplate kodunu iki katına çıkarır.
+*   **Transient State Incompatibility:** Bu pattern, diğer Context implementasyonlarında olduğu gibi yüksek frekanslı veri güncellemeleri (örneğin, real-time WebSocket'ler, drag-and-drop arayüzleri) için matematiksel olarak verimsiz kalır.
+*   Bu pattern, gereksiz re-render overhead'ini önlemek ve öngörülebilir performansı korumak için yalnızca az sayıda component tarafından consume edilen contextler için uygundur.
+
+Granular rendering kontrolü gerektiren enterprise mimariler için, özel bir Pub/Sub state manager'a geçiş operasyonel bir gerekliliktir.
+
+## Enterprise Standardı: Client ve Server State'in Ayrıştırılması (Decoupling)
+
+Context ve memoization yüksek frekanslı güncellemelerin yükü altında başarısız olduğunda, mimari çözüm separation of concerns'in kesin bir şekilde uygulanmasıdır. Enterprise seviyesindeki React uygulamaları state'i iki farklı kategoriye ayırır: transient client state ve asynchronous server state.
+
+### 1. Transient Client State için Zustand
+
+Zustand, atomic selectorler ile gerçek bir Pub/Sub modelini implement ederek Context broadcasting darboğazını çözer.
+
+*   **Granular Subscriptions:** Componentler yalnızca ihtiyaç duydukları kesin state slicelarını extract eder (örneğin, `const sidebarOpen = useStore((state) => state.sidebarOpen)`).
+*   **Render Isolation:** Bir WebSocket payload'undaki veya karmaşık bir form alanındaki mutation, ilgisiz UI toggle'larına subscribe olan componentlerde re-render tetiklemez.
+*   **Zero Boilerplate:** Component ağacını Provider ile sarmalama ve karmaşık Context splitting mantığına olan ihtiyacı ortadan kaldırır.
+
+### 2. Asynchronous Server State için TanStack Query
+
+API yanıtlarını global bir Context'te saklamak, stale verilere, memory leaklere ve gereksiz render cycle'larına yol açan bir anti-patterndir. TanStack Query, server state management'ı tamamen izole eder.
+
+*   **Request Deduplication:** Aynı anda tamamen aynı endpoint'i request eden birden fazla component, yalnızca tek bir network request'i tetikler.
+*   **Automated Caching:** Cache invalidation, background refetching ve pagination'ı native olarak yöneterek component mantığından karmaşık `useEffect` zincirlerini çıkarır.
+*   **Performance:** UI threadleri artık hantal Context providerları içinde yönetilen ağır data-fetching mantığı tarafından bloke edilmez.
+
+### Mimari Sonuç
+
+React Context bir state manager değildir; statik değişkenler için bir dependency injection aracıdır. Multi-tenant bir SaaS mimarisini ölçeklendirmek, yüksek frekanslı client-side etkileşimleri için Zustand'ı ve server senkronizasyonu için TanStack Query'yi deploy etmeyi gerektirir. Dinamik state için Context'e güvenmek, yük altında düşük performansı garanti eder.
+
+## Referanslar
+
+*   [React Context for Dependency Injection, Not State Management](https://testdouble.com/insights/react-context-for-dependency-injection-not-state-management)
+*   [React's Context API re-renders all components wrapped inside the context](https://stackoverflow.com/questions/73599444/reacts-context-api-re-renders-all-components-that-are-wrapped-inside-the-contex)
+*   [Zustand vs Context](https://www.adamhinckley.com/articles/zustand-vs-context)
