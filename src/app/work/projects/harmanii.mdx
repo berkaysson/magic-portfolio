@@ -12,6 +12,8 @@ team:
     linkedIn: "https://www.linkedin.com/in/berkaysonel/"
 link: "https://github.com/berkaysson/harmonii-music-app"
 technologies:
+  - "docker"
+  - "minio"
   - "react"
   - "styled-components"
   - "framer-motion"
@@ -25,55 +27,44 @@ technologies:
   - "minio"
   - "firebase"
   - "azure"
-
 ---
 
 ## Summary
 
-- Implemented backend using C# with ASP.NET Core and Entity Framework.
-- Designed normalized relational databases with MSSQL.
-- Used ASP.NET Identity and JWT for secure user authentication and role management.
-- Abstracted file storage operations using dependency injection and interfaces, allowing easy switching between providers (e.g., MinIO, Firebase).
-- Implemented a direct-to-storage architecture via Presigned URLs, offloading heavy I/O operations from the API server to the client.
-- Orchestrated a fully containerized environment (Frontend, Backend, Database, MinIO) using Docker Compose for environment parity.
+- Developed a scalable backend architecture using C# with ASP.NET Core 8 and Entity Framework Core.
+- Eliminated vendor lock-in by abstracting the storage layer with an `IStorageService` interface and implementing self-hosted MinIO object storage.
+- Optimized network I/O and server memory allocation by implementing Presigned PUT/GET URLs for direct client-to-storage media handling.
+- Standardized the database layer by migrating from dynamic URLs to persistent GUID-based `AudioFileKey` structures in MSSQL.
+- Containerized the entire ecosystem (API, UI, Database, and Object Storage) into an optimized multi-container environment via Docker Compose.
+- Implemented robust health checks within the orchestration layer to ensure deterministic service startup sequencing.
 
-## Overview
+## Core Features
 
-The Harmonii Music App is a dynamic full-stack project that enables users to discover, stream, and curate playlists of their favorite music. Built with React.js for the frontend and ASP.NET Core with Entity Framework and MSSQL for the backend, it incorporates strong user authentication and authorization mechanisms, including role-based access control.
+- **Audio Streaming & Uploads**: Secure, direct media streaming and asset uploading using cryptographic presigned signatures.
+- **Playlist Management**: Complete CRUD operations for custom user playlists, track discovery, and curation.
+- **Identity & Access Management**: Secure user authentication and granular role-based access control (RBAC) powered by ASP.NET Identity and JWT tokens.
+- **Responsive UI**: Single Page Application (SPA) dashboard designed for fluid playback controls, dynamic routing, and error interceptors.
 
-Admin users can verify accounts, assign moderators, and manage users. Moderators are responsible for managing music content, while regular users enjoy streaming and playlist features. The platform is architected for scalability, utilizing containerization and decoupled storage mechanisms to handle media streaming efficiently.
+## Architectural Architecture & Implementation
 
-## Purpose and Inspiration
+### 1. Storage Abstraction Layer
 
-Harmonii was the culmination of my internship at KoçSistem and served as a capstone for improving my backend development skills in C# with ASP.NET. It was a hands-on journey into relational database architecture, secure APIs, and scalable deployments. The motivation stemmed from a desire to merge backend engineering principles with real-world application demands in the music tech domain.
+The application implements an infrastructure-agnostic storage layer. By enforcing the `IStorageService` contract, the underlying storage infrastructure can be swapped seamlessly without modifying core business logic. The current implementation utilizes an on-premise MinIO cluster operating over standard S3 protocols.
 
-## Key Features
+### 2. Presigned URL Streaming Mismatch Mitigation
 
-- **User Roles & Access Control**: Role-based authentication system using ASP.NET Identity and JWT.
-- **Playlist Creation & Music Streaming**: Users can stream audio files and organize them into personal playlists.
-- **Admin & Moderator Panels**: Admins manage user accounts; moderators manage music content.
-- **Storage Abstraction & Presigned URLs**: Audio file uploads are handled securely via short-lived Presigned URLs, allowing clients to upload directly to MinIO/Firebase. This architectural decision significantly reduces API server load, memory consumption, and bandwidth usage.
-- **Containerized Infrastructure**: The entire application stack is dockerized, ensuring consistent behavior across local development and production environments.
-- **Interactive Frontend UI**: Built with React and styled-components, featuring animations via Framer Motion.
+Traditional media backends proxy heavy audio files through the application server, causing severe RAM utilization spikes and I/O bottlenecks. Harmonii circumvents this by using the backend solely as a control plane that issues short-lived Presigned URLs. The client directly uploads to and streams from the storage node, maximizing throughput.
 
-## Technologies Used
+### 3. Orchestration & Deterministic Networking
 
-- **Frontend**: React.js, React Router, Axios, Styled Components, Framer Motion
-- **Backend**: ASP.NET Core, Entity Framework Core, MSSQL, ASP.NET Identity, JWT
-- **Storage & Infrastructure**: Docker, Docker Compose, MinIO, Firebase Cloud Storage, Microsoft Azure (App Service, SQL Server, API Management, Application Insights)
+The platform is fully containerized to run identically in development and staging environments. To avoid race conditions where the API container boots before its database or storage dependencies are ready, Docker `healthcheck` parameters are explicitly bound to the `depends_on` lifecycle. Nginx handles frontend single-page application routing (`try_files`) and acts as the secure entry point.
 
-## Challenges and Learnings
+## Technical Stack
 
-Authentication and authorization were complex, especially ensuring secure token handling using JWT and ASP.NET Identity. Audio streaming posed performance concerns, addressed initially by offloading media handling to Firebase, and later refined by implementing interface-driven local storage with MinIO and Presigned URLs to bypass the API entirely during file uploads. Designing a normalized, scalable relational database schema also took several iterations.
-
-Integrating frontend-backend communication taught me the importance of concise and intuitive API design. I also developed a deeper understanding of Docker orchestration and how to maintain environment consistency.
-
-## Outcome
-
-Harmonii became a fully functional, end-to-end music streaming platform. It strengthened my backend capabilities and gave me practical experience in containerization, system design patterns, and scalable storage integration. The project validated my ability to architect and deliver real-world applications with distinct user roles, content moderation features, and optimized I/O operations.
+- **Frontend**: React.js, React Router, Axios (with global response interceptors)
+- **Backend**: ASP.NET Core 8, Entity Framework Core, MSSQL, ASP.NET Identity, JWT
+- **Infrastructure & Devops**: Docker, Docker Compose, MinIO, Nginx
 
 ## Try It Now
 
 - [GitHub Repository](https://github.com/berkaysson/harmonii-music-app)
-- Live version is closed due to cost.
-
