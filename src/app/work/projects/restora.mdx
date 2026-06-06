@@ -1,8 +1,8 @@
 ---
-title: "Restora — AI-Powered High Fidelity Archival Digitization and OCR System"
+title: "Restora  AI-Powered High Fidelity Archival Digitization and OCR System"
 publishedAt: "2026-04-06"
 featured: true
-summary: "An AI-powered project designed for the digitization and analysis of physical book pages using advanced OCR and layout detection."
+summary: "An AI-powered end-to-end archival digitization system leveraging advanced OCR, heuristic layout analysis, and accessibility-grade PDF reconstruction  built on a Clean Architecture and Domain-Driven Design backend."
 images:
   - "/images/projects/restora/restora-1.png"
   - "/images/projects/restora/restora-2.png"
@@ -27,41 +27,103 @@ technologies:
 
 ## Summary
 
-- Successfully engineered a non-blocking, asynchronous job queue architecture to handle intensive AI models (Surya OCR) without freezing the API.
-- Delivered a highly interactive, dark-themed React 19 interface with real-time WebSocket log streaming and synchronized bounding-box rendering.
-- Developed a centralized layout engine for deterministic document reconstruction, optimizing font and spatial calculations across both the UI and PDF generation pipelines.
-- Implemented heuristic reading order detection and geometric data analysis to automatically extract and apply style metadata (e.g., bold, italic) to semantic blocks.
+- Engineered a fully decoupled backend using **Clean Architecture** and **Domain-Driven Design (DDD)**, separating domain logic, use cases, infrastructure adapters, and the API presentation layer into independent, interchangeable modules.
+- Built a non-blocking, asynchronous job queue architecture to handle intensive AI inference (Surya OCR) without freezing the API, with fine-grained per-page cancellation and retry support.
+- Delivered a highly interactive, dark-themed React 19 interface with real-time WebSocket log streaming, synchronized bounding-box rendering, and a gradient-based OCR confidence map.
+- Implemented heuristic reading order detection and geometric data analysis to automatically extract and apply style metadata (bold, italic) to semantic blocks.
+- Produced accessibility-grade **Semantic PDF** exports: logically ordered, hyphen-resolved, and screen-reader-optimized output going beyond simple text-layer PDFs.
 
 ## Overview
 
-Restora is an AI-powered project specifically designed for the digitization and analysis of physical book pages. Existing solutions often struggle with complex document structures. Restora addresses this need by leveraging advanced OCR (Object Character Recognition) and layout analysis techniques to convert scanned book pages into structured, highly accurate digital formats. It provides a localized, end-to-end ecosystem for transforming physical archives into structured, searchable digital assets in multiple languages.
+Restora is an AI-powered system specifically designed for the digitization and structural analysis of physical book pages. Existing solutions often struggle with complex document layouts, multi-column arrangements, and accessibility of the resulting digital output. Restora addresses these gaps by combining advanced OCR, coordinate-based layout analysis, and heuristic reading order detection to convert scanned pages into structured, searchable, and accessibility-grade digital formats.
+
+The system provides a fully localized, end-to-end ecosystem from raw image upload through OCR processing, interactive document inspection, to multi-modal PDF export without relying on any cloud OCR service.
 
 ## Architecture & Data Design
 
-The system is built on a decoupled architecture, separating the heavy AI processing from the user interface.
-- **Tech Stack:** The backend is powered by Python 3.10+ and the **FastAPI** framework, utilizing Surya OCR (PyTorch-based). The frontend is built with **React 19 (Vite)**, **TypeScript**, and styled with **TailwindCSS** and **DaisyUI**.
-- **Data Access:** Data persistence is handled through a localized, auto-generated **SQLite** database, ensuring simple and efficient data storage for books and pages.
-- **Schema:** The core `pages` table stores the original uploaded images, extracted raw text, and coordinate-based layout JSON data. Additionally, a Storage Manager handles the hierarchical file storage for async jobs, pages, and assets.
+The backend is structured around **Clean Architecture** and **Domain-Driven Design** principles, ensuring that core business logic is fully insulated from framework, database, and OCR library concerns.
+
+### Layered Structure
+
+- **Domain Layer:** Contains pure Python entities (`Document`, `Page`), value objects (`DocumentStatus`, `OCRResult`, `LayoutData`), domain exceptions, and abstract port interfaces (`IDocumentRepository`, `IFileStorage`, `IOCREngine`, `ITaskQueue`, `INotificationService`). No external dependencies.
+- **Application Layer:** Orchestrates use cases (`UploadDocumentUseCase`, `ProcessPageUseCase`, `ReprocessDocumentUseCase`, `GetDocumentUseCase`, `ListDocumentsUseCase`, `DeleteDocumentUseCase`) exclusively through domain entities and abstract ports.
+- **Infrastructure Layer:** Provides concrete adapter implementations `SqliteDocumentRepository`, `LocalFileStorage`, `SuryaOCREngine`, `AsyncProcessingQueue`, and `WebSocketNotificationService`. Swapping any of these (e.g., replacing SQLite with PostgreSQL) requires no changes to domain or application code.
+- **API (Presentation) Layer:** FastAPI routers handle HTTP and WebSocket requests, with all dependencies injected via `api/dependencies.py` factory functions using FastAPI's `Depends` mechanism.
+
+### Data Persistence
+
+A localized, auto-generated **SQLite** database stores books, pages, raw extracted text, and coordinate-based layout JSON. A `DatabaseMapper` converts between raw `sqlite3.Row` objects and domain entities, fully isolating schema changes from business logic. File assets (uploaded PDFs, rasterized page images, OCR JSON outputs) are organized under a `uploads/{job_id}/` hierarchy managed by `LocalFileStorage`.
+
+### Tech Stack
+
+- **Backend:** Python 3.10+, FastAPI, Surya OCR (PyTorch / Segformer models), SQLite, asyncio
+- **Frontend:** React 19 (Vite), TypeScript, TailwindCSS, DaisyUI
 
 ## Key Features
 
-Restora offers a numbers of advanced developments and life quality features combined for document analysis:
-- **AI-Powered OCR & Layout Analysis:** Utilizes the Surya OCR engine (featuring Segformer models) for high-accuracy text detection. It not only reads text but extracts coordinate-based layout information (bounding boxes) for complex semantic blocks.
-- **Heuristic Layout Reconstruction:** Automatically determines the logical reading order of identified labels. It dynamically extracts style properties (such as font weight and posture) by analyzing geometric bounding box data rather than relying on hardcoded constraints.
-- **Data-Driven UI (Confidence Map):** Integrates a gradient-based visual layer representing OCR confidence scores directly onto the line-based interface, bridging raw API metrics with user experience.
-- **Dual-Layer Visualization:** Provides both line-based and semantic/geometric block-based viewing infrastructures for high-fidelity document inspection.
-- **Interactive Document Viewer:** A modern viewer where images are synchronized with bounding boxes. Users can hover over the text in the editor to highlight its physical location on the image and edit the text or sections with cleverly designed UI, and vice-versa.
-- **Multi-Page PDF Processing & Export:** Users can upload multi-page PDFs and later export the processed document (or a selected range of pages) as searchable PDFs.
+### AI-Powered OCR & Layout Analysis
+
+Restora uses the Surya OCR engine featuring Segformer-based segmentation models for high-accuracy text detection across multiple languages. Rather than producing flat text output, the engine extracts coordinate-based bounding boxes for every detected semantic block, enabling spatial reconstruction of the original document layout.
+
+### Heuristic Reading Order Detection
+
+A dedicated reading order algorithm analyzes the geometric positions of detected blocks to determine the logical flow of text handling multi-column layouts, sidebars, captions, and footnotes without relying on hardcoded structural assumptions. Style metadata such as font weight (bold) and posture (italic) are inferred from bounding box geometry rather than embedded font signals, making the system robust to scanned and photocopied sources.
+
+### OCR Confidence Visualization
+
+The document viewer integrates a gradient-based confidence map that overlays OCR certainty scores directly onto the line-level interface. This bridges raw model metrics with the user experience, allowing editors to immediately identify low-confidence regions and prioritize manual corrections.
+
+### Dual-Layer Document Viewer
+
+The interactive viewer provides two complementary visualization modes:
+
+- **Line-based view:** Shows detected text lines with their spatial positions.
+- **Semantic/geometric block view:** Groups lines into logical semantic blocks with full bounding box overlays.
+
+In both modes, the image and text panels are synchronized hovering over a text segment highlights its physical location on the page image, and vice versa.
+
+### Semantic PDF Export
+
+Beyond standard searchable PDF generation, Restora produces a **Semantic PDF** export mode designed for accessibility:
+
+- Text is written in **logical reading order** as determined by the heuristic detection algorithm, not in the visual scan order of the OCR engine.
+- **Sentence-ending hyphens** (soft hyphens introduced by physical line breaks in printed books) are automatically detected and resolved, restoring words to their complete forms.
+- The resulting PDF is structured for screen readers and assistive technologies, producing output that is near-ideal for visually impaired readers.
+- Users can export the full document or any selected page range in either standard or semantic mode.
+
+### Asynchronous Multi-Page PDF Processing
+
+Users upload multi-page PDFs which are immediately split into individual page jobs and queued for parallel background processing. The API returns instantly with a `job_id`; pages are rasterized to high-quality PNG and processed through OCR independently, with real-time per-page progress broadcast over WebSocket.
 
 ## Technical Implementation
 
-The development process involved solving critical performance bottlenecks, especially regarding AI inference times:
-- **Server Actions / API:** To handle long-running OCR tasks without blocking the API, the backend employs a **Job Queue and Worker architecture**. New endpoints like `/upload-pdf`, `/document/{job_id}/cancel`, and `/document/{job_id}/retry-failed` allow fine-grained mutation and management of background tasks. The OCR processing itself is highly modularized into Core, Models, and OCR components.
-- **Centralized Layout Algorithm:** Consolidated all repetitive rendering mathematics for PDF generation and UI rendering into a single reusable module, adhering strictly to DRY principles and preventing spatial rendering discrepancies.
-- **Security:** *Note: As Restora is designed primarily as a localized tool running on `localhost`, complex RBAC or authentication mechanisms are not natively implemented in the current scope.*
-- **State Management:** The frontend utilizes React Context to manage global states. A key implementation is the use of **WebSockets** to stream real-time processing logs and progress updates directly from the backend workers to the UI.
+### Job Queue & Worker Architecture
+
+Long-running OCR inference is handled by an `asyncio.Queue`-based worker pool (`AsyncProcessingQueue`) that is initialized at application startup. API endpoints such as `/upload-pdf`, `/document/{job_id}/cancel`, and `/document/{job_id}/retry-failed` allow fine-grained management of background tasks without blocking the request thread.
+
+### Centralized Layout Engine
+
+All spatial rendering mathematics used across both the interactive UI and the PDF generation pipeline are consolidated into a single reusable layout module. This ensures that font calculations, bounding box scaling, and block positioning remain consistent between what the user sees in the viewer and what is written to the exported PDF.
+
+### Real-Time WebSocket Communication
+
+Two WebSocket channels serve the frontend:
+
+- `/api/v2/ws/progress/{job_id}` streams per-page processing updates (status transitions, progress percentage, OCR results) as JSON events.
+- `/api/v2/ws/logs` broadcasts live system logs from the backend workers directly to the browser's log monitoring panel.
+
+### Dependency Injection
+
+All infrastructure adapters are instantiated as singletons via factory functions in `api/dependencies.py` and injected into use case constructors through FastAPI's `Depends` mechanism. Endpoints remain completely decoupled from concrete implementations.
+
+### State Management (Frontend)
+
+Global state is managed through React Context. The document viewer, confidence overlay, reading order display, and export controls share a unified state model, with WebSocket events updating page statuses reactively without requiring polling.
+
+### Security Note
+
+As Restora is designed as a localized tool running on `localhost`, complex authentication or RBAC mechanisms are intentionally outside the current scope.
 
 ## Try It Now
 
 - [GitHub Repository](https://github.com/berkaysson/restora)
-
