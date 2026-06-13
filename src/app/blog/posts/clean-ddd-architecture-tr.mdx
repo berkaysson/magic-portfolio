@@ -1,0 +1,295 @@
+---
+title: "Projem Büyüdükçe Neden Kontrolden Çıktı? Monolitik Yapıdan Clean Architecture ve DDD'ye Geçiş Öyküm"
+summary: "Restora adını verdiğim dijitalleştirme aracı büyüdükçe, monolitik mimarinin sınırlarına çarptım. Bu yazıda, codebase'in nasıl iç içe geçtiğini, yeniden faktör etme sürecini ve domain-driven design (DDD) prensiplerini entegre ederek nasıl daha sürdürülebilir bir yapıya dönüştürdüğümü anlatıyorum."
+publishedAt: "2026-06-15"
+tag: "#Python #FastAPI #CleanArchitecture #DDD #OCR #SoftwareEngineering"
+---
+
+# Projem Büyüdükçe Neden Kontrolden Çıktı? Monolitik Yapıdan Clean Architecture ve DDD'ye Geçiş Öyküm
+
+## Giriş: Hızlı Başlamanın ve Sonrasındaki Tıkanmanın Öyküsü
+
+Her şey kişisel bir ihtiyaçla başladı: Fiziksel kitap sayfalarını tarayıp yüksek doğrulukla dijitalleştiren, mizanpaj analizi yapan, doğruluk-güven yüzdesi veren ve herhangi bir dökümanı heuristic (semantik ve hiyerarşik) okuma sırasıyla seslendirmeye hazır hale getiren, ekran okuyucu dostu, yani **dijital dinlenebilir** bir yapıya dönüştüren yerel bir araç geliştirmek istedim. Projeye **Restora** adını verdim.
+
+Teknoloji seçimi ilk aşamada oldukça pratikti: Kullanıcı arayüzü için **React**, backend tarafında hızlıca yol almak için **FastAPI**, yerel veritabanı için **SQLite**, asenkron süreçler için Python’ın yerleşik `asyncio` kütüphanesi ve OCR motoru olarak da **Surya OCR**.
+
+İlk haftalarda her şey oldukça akıcı gidiyordu. Basit API uç noktaları ve resim yüklemeyi sağlayan temel fonksiyonlarla prototip çalışıyordu. Hatta OCR motorunu kurmuş, çeşitli katman ve modellerle oldukça doğru sonuçlar elde etmeyi de başarmıştım. Ancak projeye yeni özellikler eklemek istedikçe, tek başıma geliştirdiğim bu monolitik yapının sınırlarına çarpmaya başladım.
+
+---
+
+## Karşılaştığım Temel Sorunlar (Neden Tıkandım?)
+
+Projenin kapsamı genişledikçe ve araya başka işler girip kodun başına tekrar oturduğumda kendimi şu döngünün içinde buldum:
+
+- **Araya Vakit Girince Koda Yabancılaşma:** Kod tabanına birkaç hafta ara verip döndüğümde, iş mantığı, DB sorguları ve dosya yönetim kodları iç içe geçtiği için sistemi anlamakta zorlanıyordum.
+- **Yeni Özellik Eklerken Uzayan Debug Süreleri:** Sisteme asenkron bir görev kuyruğu veya canlı log akışı gibi özellikler eklemek istediğimde, sıkı sıkıya bağlı (tightly-coupled) dosyalar yüzünden beklenmedik çökmeler meydana geliyordu. Artık kullanmadığım kod bloklarının sağda solda yaşamaya devam ettiğini görüyordum.
+- **Verimsiz Bileşenler ve Tespit Zorluğu:** Arka planda çalışan OCR işlemlerinin veya sayfa dönüştürme süreçlerinin bazen yavaş kaldığını fark ediyordum. Ancak tüm akış mognolitik olduğu için darboğaza neden olan verimsiz bileşenleri (OCR motoru mu, veritabanı yazma süreci mi, dosya sistemi işlemleri mi) izole etmek ve tespit etmek oldukça güçleşmişti.
+- **SQLite'tan PostgreSQL'e Geçiş Hayalinin Uzaklaşması:** Ham SQL sorguları doğrudan API uç noktalarına kadar sızdığı için veritabanı altyapısını değiştirmek projenin yarısını baştan yazmak anlamına gelecekti. SQLite yerine PostgreSQL kullanma fikri her geçen gün benden uzaklaşıyordu.
+
+---
+
+## Dönüm Noktası: Clean Architecture, DDD ve Bağımsız OCR Engine
+
+Bu tıkanıklığı aşmak için projeyi Clean Architecture (Temiz Mimari), Domain-Driven Design (DDD) ve bağımsız bir **OCR Engine** katmanı etrafında baştan yapılandırmaya karar verdim.
+
+Sistemi beş temel katmana ayırdım:
+
+```text
+backend/
+├── domain/         # Çekirdek Kurallar (Sıfır dış bağımlılık)
+├── application/    # Kullanım Senaryoları (Use Cases)
+├── infrastructure/ # Altyapı Adaptörleri (DB, Dosya Sistemi, Kuyruk)
+├── engine/         # Restora OCR Engine (AI, Model ve Layout Analiz Katmanı)
+└── api/            # Sunum Katmanı (FastAPI, WebSockets)
+```
+
+---
+
+## Yeni Yapı Nasıl Kuruldu?
+
+### 1. Çekirdek İş Mantığının (Domain) Soyutlanması
+
+İlk olarak, sistemdeki en temel kavramları temsil eden Entity ve Value Object yapılarını dış bağımlılıklardan arındırarak tanımladım. Örneğin, bir sayfanın durumunu ve OCR çıktısını temsil eden nesneleri saf Python sınıfları olarak kurguladım:
+
+```python
+# domain/entities/page.py
+from dataclasses import dataclass
+from typing import Optional
+from domain.value_objects.document_status import DocumentStatus
+from domain.value_objects.ocr_result import OCRResult, LayoutData
+
+@dataclass
+class Page:
+    """Bir dokümana ait tek bir sayfayı temsil eden Entity."""
+    document_id: str
+    page_number: int
+    status: DocumentStatus = DocumentStatus.PENDING
+    image_path: Optional[str] = None
+    ocr_result: Optional[OCRResult] = None
+    layout_data: Optional[LayoutData] = None
+    error_message: Optional[str] = None
+
+    def mark_as_processing(self) -> None:
+        self.status = DocumentStatus.PROCESSING
+
+    def mark_as_completed(self, image_path: str, ocr_result: OCRResult, layout_data: LayoutData) -> None:
+        self.status = DocumentStatus.COMPLETED
+        self.image_path = image_path
+        self.ocr_result = ocr_result
+        self.layout_data = layout_data
+        self.error_message = None
+
+    def mark_as_failed(self, error_message: str) -> None:
+        self.status = DocumentStatus.FAILED
+        self.error_message = error_message
+```
+
+Veritabanı okuma/yazma veya asenkron kuyruk yönetimi gibi dış dünyas ile iletişim kuracak sistemler için ise sadece soyut portlar (interfaces) tanımladım:
+
+```python
+# domain/interfaces/task_queue.py
+from abc import ABC, abstractmethod
+
+class ITaskQueue(ABC):
+    @abstractmethod
+    async def enqueue_page(self, job_id: str, page_number: int, file_path: str) -> None:
+        """Bir sayfayı işlenmek üzere kuyruğa ekler."""
+        pass
+
+    @abstractmethod
+    async def cancel_job(self, job_id: str) -> None:
+        """Aktif bir işi iptal eder."""
+        pass
+
+    @abstractmethod
+    async def start(self) -> None:
+        """Kuyruk worker'larını başlatır."""
+        pass
+
+    @abstractmethod
+    async def stop(self) -> None:
+        """Kuyruk worker'larını durdurur."""
+        pass
+```
+
+### 2. Restora OCR Engine Katmanı
+
+OCR işlemlerini, yapay zeka modellerini ve sayfa mizanpaj (layout) analizini gerçekleştiren yapıyı, bağımsız tüketilebilen bir **Restora OCR Engine** modülü altında topladım. Bu motor dört temel bileşenden oluşur:
+
+- **Core (`core.py`):** İşlemleri koordine eder. Model durumunu doğrular, girdi PDF ise görsele dönüştürür, OCR modülünü çağırır ve performans ölçümlerini loglar.
+- **Models (`models.py`):** Surya OCR modellerini (`RecognitionPredictor`, `DetectionPredictor`, `LayoutPredictor`) belleğe yükler ve CPU/GPU yönetimini üstlenir.
+- **OCR (`ocr.py`):** Metinleri okur, sayfayı semantik bloklara böler ve koordinat geometrisi kullanarak metin satırları ile mizanpaj etiketlerini eşleştirir.
+- **Preprocessor (`preprocessor.py`):** PDF sayfalarını yüksek çözünürlüklü görsellere dönüştürür.
+
+Bu motorun ürettiği ve dökümanın hiyerarşik yapısını (dolayısıyla seslendirilebilir akışını) belirleyen JSON çıktısı şu şekildedir:
+
+```json
+{
+  "text_lines": [
+    {
+      "text": "Örnek başlık metni",
+      "bbox": [100, 150, 400, 180], // Koordinat bilgileri
+      "confidence": 0.98, // Güven skoru
+      "layout_labels": ["Text", "Header"] // Metnin doğasını belirten semantik etiketler
+    }
+  ],
+  "layout_blocks": [
+    {
+      "label": "Header",
+      "bbox": [100, 140, 420, 190],
+      "confidence": 0.99
+    }
+  ]
+}
+```
+
+### 3. İş Akışlarının (Use Cases) Düzenlenmesi
+
+Uygulama katmanında, her bir iş akışını tek bir sorumluluğa sahip Use Case sınıflarına devrettim. `UploadDocumentUseCase` sınıfı, doğrudan dosya sistemine veya veritabanına bağımlı olmak yerine, constructor seviyesinde soyut portları kabul eder:
+
+```python
+# application/use_cases/upload_document.py
+import uuid
+import os
+from domain.entities.document import Document
+from domain.entities.page import Page
+from domain.interfaces import IDocumentRepository, IFileStorage, ITaskQueue
+from application.dto.document_dto import DocumentDTO
+
+class UploadDocumentUseCase:
+    """Yeni bir doküman yükleme iş akışını yönetir."""
+
+    def __init__(
+        self,
+        repository: IDocumentRepository,
+        storage: IFileStorage,
+        task_queue: ITaskQueue
+    ):
+        self.repository = repository
+        self.storage = storage
+        self.task_queue = task_queue
+
+    async def execute(self, filename: str, content: bytes) -> DocumentDTO:
+        # 1. Dosya tipi kontrolü
+        allowed_extensions = [".pdf", ".png", ".jpg", ".jpeg"]
+        ext = os.path.splitext(filename)[1].lower()
+        if ext not in allowed_extensions:
+            raise ValueError(
+                f"Desteklenmeyen dosya formatı: {ext}. Sadece PDF ve resim dosyaları kabul edilir."
+            )
+
+        # 2. Benzersiz bir Job ID oluştur
+        job_id = str(uuid.uuid4())
+
+        # 3. Dosyayı Infrastructure üzerinden kaydet
+        file_path = self.storage.save_file(job_id, filename, content)
+
+        # 4. Sayfa sayısını tespit et (PDF için gerçek sayfa sayısı, resim için 1)
+        total_pages = self._get_page_count(file_path)
+
+        # 5. Domain Entity'lerini oluştur (Doküman + Sayfalar)
+        document = Document(
+            id=job_id,
+            filename=filename,
+            total_pages=total_pages,
+            file_path=file_path
+        )
+        for i in range(1, total_pages + 1):
+            document.pages.append(Page(document_id=job_id, page_number=i))
+
+        # 6. Veritabanına kaydet
+        self.repository.save(document)
+
+        # 7. Her sayfayı kuyruğa ekle (asenkron işleme başlatılır)
+        for i in range(1, total_pages + 1):
+            await self.task_queue.enqueue_page(job_id, i, file_path)
+
+        return DocumentDTO.from_document(document)
+
+    def _get_page_count(self, file_path: str) -> int:
+        """Dosyanın sayfa sayısını belirler."""
+        ext = os.path.splitext(file_path)[1].lower()
+        if ext == ".pdf":
+            try:
+                import pypdfium2 as pdfium
+                pdf = pdfium.PdfDocument(file_path)
+                count = len(pdf)
+                pdf.close()
+                return count
+            except Exception:
+                return 1
+        return 1  # Resim dosyaları tek sayfadır
+```
+
+### 4. Bağımlılık Yönetimi (Dependency Injection)
+
+Yapay zeka modellerini barındıran `SuryaOCREngine`, veritabanı deposu, dosya sistemi ve asenkron kuyruk servisleri `api/dependencies.py` içerisinde birer singleton (tekil örnek) olarak tanımlandı.
+
+Burada dairesel bağımlılık (circular dependency) sorununu çözmek için asenkron kuyruğa (`AsyncProcessingQueue`) sayfa işleme use case'ini dinamik bir callback (`process_page_callback`) aracılığıyla enjekte ettim:
+
+```python
+# api/dependencies.py
+from fastapi import Depends
+from infrastructure.database.sqlite_document_repository import SqliteDocumentRepository
+from infrastructure.storage.local_file_storage import LocalFileStorage
+from infrastructure.queue.async_processing_queue import AsyncProcessingQueue
+from infrastructure.notifications.websocket_notification_service import WebSocketNotificationService
+from infrastructure.ocr.surya_ocr_engine import SuryaOCREngine
+from application.use_cases.upload_document import UploadDocumentUseCase
+from application.use_cases.process_page import ProcessPageUseCase
+
+# Singletons (Tekil Örnekler)
+_repository_instance = None
+_storage_instance = None
+_task_queue_instance = None
+_notification_service_instance = None
+_ocr_engine_instance = None
+
+def get_repository() -> SqliteDocumentRepository:
+    global _repository_instance
+    if _repository_instance is None:
+        _repository_instance = SqliteDocumentRepository()
+    return _repository_instance
+
+def get_storage() -> LocalFileStorage:
+    global _storage_instance
+    if _storage_instance is None:
+        _storage_instance = LocalFileStorage(base_dir="uploads")
+    return _storage_instance
+
+def get_ocr_engine() -> SuryaOCREngine:
+    global _ocr_engine_instance
+    if _ocr_engine_instance is None:
+        _ocr_engine_instance = SuryaOCREngine()
+    return _ocr_engine_instance
+
+def get_notification_service() -> WebSocketNotificationService:
+    global _notification_service_instance
+    if _notification_service_instance is None:
+        _notification_service_instance = WebSocketNotificationService()
+    return _notification_service_instance
+
+# Use Case Fabrika Fonksiyonları
+def get_upload_use_case(
+    repository: SqliteDocumentRepository = Depends(get_repository),
+    storage: LocalFileStorage = Depends(get_storage),
+    task_queue: AsyncProcessingQueue = Depends(get_task_queue),
+) -> UploadDocumentUseCase:
+    return UploadDocumentUseCase(repository, storage, task_queue)
+
+# ... Diğer Tasks, Get, List, Delete, Cancel ve Reprocess Use Case fabrika fonksiyonları benzer mantıkla devam ediyor ...
+```
+
+---
+
+## Mimari Dönüşüm Sonrası Neler Değişti?
+
+Bu yapısal dönüşümün ardından projede karşılaştığım sorunlar şu şekilde çözüme kavuştu:
+
+- **Kod Okunabilirliği ve Bakım:** Aradan vakit geçse bile iş mantığının sınırları net olduğu için koda yabancılaşma sorunu ortadan kalktı. Her bileşenin yeri ve sorumluluğu tanımlı hale geldi.
+- **Kısalan Hata Ayıklama (Debug) Süreleri:** Hataları katmanlar seviyesinde hızlıca izole edebiliyorum. Dosya okuma veya AI çıkarım süreçlerinde yaşanan bir çökme, diğer modülleri etkilemeden ilgili katmanda tespit edilip giderilebiliyor.
+- **Verimsiz Bileşenlerin Kolay Tespiti:** OCR motoru ve arka plan kuyruğu bağımsız yapılar olarak tüketildiği için, hangi metodun ne kadar CPU/GPU ve zaman harcadığını profillemek ve darboğaz oluşturan verimsiz süreçleri optimize etmek çok daha pratikleşti.
+- **PostgreSQL Geçişinin Gerçekçi Bir Hedef Olması:** Tüm veritabanı işlemleri `SqliteDocumentRepository` içinde izole edildiği için, projeyi etkilemeden PostgreSQL adaptörü yazıp sistemi beslemek artık uzak bir hayal değil, sadece bir implementasyon adımı haline geldi.
+- **Motorun Bağımsız Çalışma Yeteneği:** OCR motorunun tamamen izole bir yapıda olması, onu ileride Restora dışında farklı projelerde veya bağımsız bir mikro servis olarak da kullanabilme imkanı sunuyor.
+- **Geleceğe Yönelik Ölçeklenebilirlik:** İleride yapacağım sunucu veya bulut dağıtım (deployment) planları için çok daha modüler ve yatayda ölçeklenebilir bir altyapı elde ettim.
+- **Kafası Rahat Bir Geliştirici:** Belki de en önemlisi, kodun başına her oturduğunda "neresi kırılacak" endişesi yaşamayan, projenin gidişatını daha net görebilen, kafası biraz daha rahat bir geliştirici deneyimi sahibi olmam.

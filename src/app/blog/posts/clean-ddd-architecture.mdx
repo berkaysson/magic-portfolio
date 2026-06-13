@@ -1,0 +1,295 @@
+---
+title: "Why Did My Project Get Out of Control as It Grew? My Journey of Transitioning from a Monolithic Structure to Clean Architecture and DDD"
+summary: "Restora, a digitization tool I named, grew, and I hit the limits of its monolithic architecture. This article details how the codebase became intertwined, the refactoring process, and how I transformed it into a more sustainable structure by integrating domain-driven design (DDD) principles."
+publishedAt: "2026-06-15"
+tag: "#Python #FastAPI #CleanArchitecture #DDD #OCR #SoftwareEngineering"
+---
+
+# Why Did My Project Get Out of Control as It Grew? My Journey of Transitioning from a Monolithic Structure to Clean Architecture and DDD
+
+## Introduction: A Story of Starting Fast and Stalling Afterwards
+
+It all started with a personal need: I wanted to develop a local tool that scans physical book pages and digitalizes them with high accuracy, performs layout analysis, provides an accuracy-confidence percentage, and prepares any document for text-to-speech with a heuristic (semantic and hierarchical) reading order, turning them into a screen-reader-friendly—meaning **digitally listenable**—structure. I named the project **Restora**.
+
+The choice of technology was quite practical at the initial stage: **React** for the user interface, **FastAPI** to move quickly on the backend, **SQLite** for the local database, Python's built-in `asyncio` library for asynchronous processes, and **Surya OCR** as the OCR engine.
+
+During the first few weeks, everything went quite smoothly. The prototype was working with simple API endpoints and basic functions for image uploading. I had even set up the OCR engine and managed to achieve highly accurate results using various layers and models. However, as I wanted to add new features to the project, I began to hit the limits of this monolithic structure that I was developing on my own.
+
+---
+
+## Core Issues I Faced (Why Did I Stall?)
+
+As the scope of the project expanded, and I returned to the code after other tasks intervened, I found myself in the following loop:
+
+- **Code Alienation After a Break:** When I returned to the codebase after a break of a few weeks, I struggled to understand the system because business logic, DB queries, and file management code were intertwined.
+- **Prolonged Debugging Times When Adding New Features:** When I wanted to add features like an asynchronous task queue or live log streaming to the system, unexpected crashes occurred due to tightly-coupled files. I noticed that unused code blocks continued to linger in various places.
+- **Inefficient Components and Difficulty of Detection:** I noticed that background OCR operations or page conversion processes were sometimes slow. However, because the entire flow was monolithic, isolating and identifying the inefficient components causing the bottleneck (the OCR engine, the database write process, or the file system operations) had become quite difficult.
+- **The Dream of Transitioning from SQLite to PostgreSQL Fading Away:** Because raw SQL queries leaked directly into the API endpoints, changing the database infrastructure would mean rewriting half of the project. The idea of using PostgreSQL instead of SQLite was slipping further away from me every day.
+
+---
+
+## The Turning Point: Clean Architecture, DDD, and an Independent OCR Engine
+
+To overcome this bottleneck, I decided to restructure the project around Clean Architecture, Domain-Driven Design (DDD), and an independent **OCR Engine** layer.
+
+I divided the system into five core layers:
+
+```text
+backend/
+├── domain/         # Core Rules (Zero external dependencies)
+├── application/    # Use Cases
+├── infrastructure/ # Infrastructure Adapters (DB, File System, Queue)
+├── engine/         # Restora OCR Engine (AI, Model, and Layout Analysis Layer)
+└── api/            # Presentation Layer (FastAPI, WebSockets)
+```
+
+---
+
+## How the New Structure Was Built
+
+### 1. Abstraction of Core Business Logic (Domain)
+
+First, I defined the Entity and Value Object structures, which represent the most fundamental concepts in the system, by freeing them from external dependencies. For example, I designed the objects representing a page's status and its OCR output as pure Python classes:
+
+```python
+# domain/entities/page.py
+from dataclasses import dataclass
+from typing import Optional
+from domain.value_objects.document_status import DocumentStatus
+from domain.value_objects.ocr_result import OCRResult, LayoutData
+
+@dataclass
+class Page:
+    """Entity representing a single page of a document."""
+    document_id: str
+    page_number: int
+    status: DocumentStatus = DocumentStatus.PENDING
+    image_path: Optional[str] = None
+    ocr_result: Optional[OCRResult] = None
+    layout_data: Optional[LayoutData] = None
+    error_message: Optional[str] = None
+
+    def mark_as_processing(self) -> None:
+        self.status = DocumentStatus.PROCESSING
+
+    def mark_as_completed(self, image_path: str, ocr_result: OCRResult, layout_data: LayoutData) -> None:
+        self.status = DocumentStatus.COMPLETED
+        self.image_path = image_path
+        self.ocr_result = ocr_result
+        self.layout_data = layout_data
+        self.error_message = None
+
+    def mark_as_failed(self, error_message: str) -> None:
+        self.status = DocumentStatus.FAILED
+        self.error_message = error_message
+```
+
+For systems that communicate with the external world, such as database read/write operations or asynchronous queue management, I defined only abstract ports (interfaces):
+
+```python
+# domain/interfaces/task_queue.py
+from abc import ABC, abstractmethod
+
+class ITaskQueue(ABC):
+    @abstractmethod
+    async def enqueue_page(self, job_id: str, page_number: int, file_path: str) -> None:
+        """Enqueues a page for processing."""
+        pass
+
+    @abstractmethod
+    async def cancel_job(self, job_id: str) -> None:
+        """Cancels an active job."""
+        pass
+
+    @abstractmethod
+    async def start(self) -> None:
+        """Starts queue workers."""
+        pass
+
+    @abstractmethod
+    async def stop(self) -> None:
+        """Stops queue workers."""
+        pass
+```
+
+### 2. Restora OCR Engine Layer
+
+I gathered the structure that performs OCR processes, artificial intelligence models, and page layout analysis under an independently consumable **Restora OCR Engine** module. This engine consists of four core components:
+
+- **Core (`core.py`):** Coordinates operations. Verifies model status, converts input to image if it is a PDF, calls the OCR module, and logs performance metrics.
+- **Models (`models.py`):** Loads Surya OCR models (`RecognitionPredictor`, `DetectionPredictor`, `LayoutPredictor`) into memory and handles CPU/GPU management.
+- **OCR (`ocr.py`):** Reads text, splits the page into semantic blocks, and aligns text lines with layout labels using coordinate geometry.
+- **Preprocessor (`preprocessor.py`):** Converts PDF pages into high-resolution images.
+
+The JSON output produced by this engine, which determines the hierarchical structure of the document (and thus its text-to-speech stream), is as follows:
+
+```json
+{
+  "text_lines": [
+    {
+      "text": "Example header text",
+      "bbox": [100, 150, 400, 180], // Coordinate information
+      "confidence": 0.98, // Confidence score
+      "layout_labels": ["Text", "Header"] // Semantic labels indicating the nature of the text
+    }
+  ],
+  "layout_blocks": [
+    {
+      "label": "Header",
+      "bbox": [100, 140, 420, 190],
+      "confidence": 0.99
+    }
+  ]
+}
+```
+
+### 3. Organizing Workflows (Use Cases)
+
+In the application layer, I delegated each workflow to Use Case classes with a single responsibility. Instead of directly depending on the file system or the database, the `UploadDocumentUseCase` class accepts abstract ports at the constructor level:
+
+```python
+# application/use_cases/upload_document.py
+import uuid
+import os
+from domain.entities.document import Document
+from domain.entities.page import Page
+from domain.interfaces import IDocumentRepository, IFileStorage, ITaskQueue
+from application.dto.document_dto import DocumentDTO
+
+class UploadDocumentUseCase:
+    """Manages the workflow of uploading a new document."""
+
+    def __init__(
+        self,
+        repository: IDocumentRepository,
+        storage: IFileStorage,
+        task_queue: ITaskQueue
+    ):
+        self.repository = repository
+        self.storage = storage
+        self.task_queue = task_queue
+
+    async def execute(self, filename: str, content: bytes) -> DocumentDTO:
+        # 1. File type check
+        allowed_extensions = [".pdf", ".png", ".jpg", ".jpeg"]
+        ext = os.path.splitext(filename)[1].lower()
+        if ext not in allowed_extensions:
+            raise ValueError(
+                f"Unsupported file format: {ext}. Only PDF and image files are accepted."
+            )
+
+        # 2. Create a unique Job ID
+        job_id = str(uuid.uuid4())
+
+        # 3. Save the file via Infrastructure
+        file_path = self.storage.save_file(job_id, filename, content)
+
+        # 4. Detect page count (actual page count for PDF, 1 for image)
+        total_pages = self._get_page_count(file_path)
+
+        # 5. Create Domain Entities (Document + Pages)
+        document = Document(
+            id=job_id,
+            filename=filename,
+            total_pages=total_pages,
+            file_path=file_path
+        )
+        for i in range(1, total_pages + 1):
+            document.pages.append(Page(document_id=job_id, page_number=i))
+
+        # 6. Save to database
+        self.repository.save(document)
+
+        # 7. Enqueue each page (starts asynchronous processing)
+        for i in range(1, total_pages + 1):
+            await self.task_queue.enqueue_page(job_id, i, file_path)
+
+        return DocumentDTO.from_document(document)
+
+    def _get_page_count(self, file_path: str) -> int:
+        """Determines the page count of the file."""
+        ext = os.path.splitext(file_path)[1].lower()
+        if ext == ".pdf":
+            try:
+                import pypdfium2 as pdfium
+                pdf = pdfium.PdfDocument(file_path)
+                count = len(pdf)
+                pdf.close()
+                return count
+            except Exception:
+                return 1
+        return 1  # Image files are single-page
+```
+
+### 4. Dependency Management (Dependency Injection)
+
+`SuryaOCREngine` (which hosts the AI models), the database repository, the file system, and the asynchronous queue services were defined as singletons inside `api/dependencies.py`.
+
+Here, to resolve the circular dependency issue, I injected the page processing use case into the asynchronous queue (`AsyncProcessingQueue`) via a dynamic callback (`process_page_callback`):
+
+```python
+# api/dependencies.py
+from fastapi import Depends
+from infrastructure.database.sqlite_document_repository import SqliteDocumentRepository
+from infrastructure.storage.local_file_storage import LocalFileStorage
+from infrastructure.queue.async_processing_queue import AsyncProcessingQueue
+from infrastructure.notifications.websocket_notification_service import WebSocketNotificationService
+from infrastructure.ocr.surya_ocr_engine import SuryaOCREngine
+from application.use_cases.upload_document import UploadDocumentUseCase
+from application.use_cases.process_page import ProcessPageUseCase
+
+# Singletons
+_repository_instance = None
+_storage_instance = None
+_task_queue_instance = None
+_notification_service_instance = None
+_ocr_engine_instance = None
+
+def get_repository() -> SqliteDocumentRepository:
+    global _repository_instance
+    if _repository_instance is None:
+        _repository_instance = SqliteDocumentRepository()
+    return _repository_instance
+
+def get_storage() -> LocalFileStorage:
+    global _storage_instance
+    if _storage_instance is None:
+        _storage_instance = LocalFileStorage(base_dir="uploads")
+    return _storage_instance
+
+def get_ocr_engine() -> SuryaOCREngine:
+    global _ocr_engine_instance
+    if _ocr_engine_instance is None:
+        _ocr_engine_instance = SuryaOCREngine()
+    return _ocr_engine_instance
+
+def get_notification_service() -> WebSocketNotificationService:
+    global _notification_service_instance
+    if _notification_service_instance is None:
+        _notification_service_instance = WebSocketNotificationService()
+    return _notification_service_instance
+
+# Use Case Factory Functions
+def get_upload_use_case(
+    repository: SqliteDocumentRepository = Depends(get_repository),
+    storage: LocalFileStorage = Depends(get_storage),
+    task_queue: AsyncProcessingQueue = Depends(get_task_queue),
+) -> UploadDocumentUseCase:
+    return UploadDocumentUseCase(repository, storage, task_queue)
+
+# ... Other Tasks, Get, List, Delete, Cancel, and Reprocess Use Case factory functions continue with similar logic ...
+```
+
+---
+
+## What Changed After the Architectural Transformation?
+
+Following this structural transformation, the issues I encountered in the project were resolved as follows:
+
+- **Code Readability and Maintenance:** Even after a break, since the boundaries of the business logic are clear, the issue of code alienation was eliminated. The place and responsibility of each component became defined.
+- **Shorter Debugging Times:** I can isolate errors quickly at the layer level. A crash occurring in file reading or AI inference processes can be detected and resolved in the respective layer without affecting other modules.
+- **Easier Detection of Inefficient Components:** Since the OCR engine and background queue are consumed as independent structures, profiling how much CPU/GPU and time each method consumes, and optimizing the inefficient processes causing bottlenecks, became much more practical.
+- **PostgreSQL Transition Becoming a Realistic Goal:** Since all database operations are isolated inside the `SqliteDocumentRepository`, writing a PostgreSQL adapter and feeding the system without affecting the rest of the project is no longer a distant dream, but merely an implementation step.
+- **Independent Operation Capability of the Engine:** The completely isolated nature of the OCR engine offers the possibility to use it in different projects other than Restora or as an independent microservice in the future.
+- **Scalability for the Future:** I have achieved a much more modular and horizontally scalable infrastructure for my future server or cloud deployment plans.
+- **A Developer with Peace of Mind:** Perhaps most importantly, I now have a more comfortable developer experience, free from the anxiety of "what is going to break next" every time I sit down to code, and with a clearer vision of the project's direction.
